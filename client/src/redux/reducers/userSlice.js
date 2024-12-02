@@ -14,6 +14,19 @@ export const getAllUsers = createAsyncThunk(
     }
 );
 
+// Async thunk for registering a new user
+export const registerUser = createAsyncThunk(
+    'users/registerUser',
+    async (userData) => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/v1/users', userData);
+            return response.data;
+        } catch (error) {
+            throw error.response.data;
+        }
+    }
+);
+
 const userSlice = createSlice({
     name: 'users',
     initialState: {
@@ -24,6 +37,7 @@ const userSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // getAllUsers cases
             .addCase(getAllUsers.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -33,6 +47,19 @@ const userSlice = createSlice({
                 state.users = action.payload;
             })
             .addCase(getAllUsers.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            })
+            // registerUser cases
+            .addCase(registerUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(registerUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.users.push(action.payload);
+            })
+            .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
             });

@@ -2,37 +2,49 @@ import userModel from '../models/user.js'
 
 class userController {
     static getAllUsers = async(req, res) => {
-        const fetchAllUsers = await userModel.find({});
-        return res.status(200).json(fetchAllUsers)
+        try {
+            const fetchAllUsers = await userModel.find({});
+            return res.status(200).json(fetchAllUsers);
+        } catch (error) {
+            return res.status(500).json({ message: "Error fetching users", error: error.message });
+        }
     }
     
     static createNewUser = async(req, res) => {
-        const {name, email, gender, city} = req.body;
+        const { name, email, password, gender, city } = req.body;
         try {
-            if(name && email && gender && city) {
-                const isEmail = await userModel.findOne({ email });
-                if(!isEmail) {
-                    const profileImage = req.file ? req.file.filename : null; // Check if file exists
-                    const newUser = userModel({
-                        name, 
-                        email,
-                        gender,
-                        city,
-                        profile : profileImage,
-                    });
-
-                    const response = await newUser.save();
-                    if(response) {
-                        return res.status(200).json({message: "Successfully registered"});
-                    }
-                } else {
-                    return res.status(400).json({message: "user already exixts"});
-                }
-            } else {
-                return res.status(400).json({message: "*all fields are required"})
+            if (!name || !email || !password || !gender || !city) {
+                return res.status(400).json({ message: "All fields are required" });
             }
+
+            const isEmail = await userModel.findOne({ email });
+            if (isEmail) {
+                return res.status(400).json({ message: "Email already exists" });
+            }
+
+            const profileImage = req.file ? req.file.filename : null;
+            
+            const newUser = new userModel({
+                name,
+                email,
+                password,
+                gender,
+                city,
+                profile: profileImage,
+            });
+
+            const savedUser = await newUser.save();
+            return res.status(201).json({
+                message: "User registered successfully",
+                user: savedUser
+            });
+
         } catch (error) {
-            return res.status(500).json({message: error.message});
+            console.error("Server error:", error);
+            return res.status(500).json({
+                message: "Error creating user",
+                error: error.message
+            });
         }
     }
 }

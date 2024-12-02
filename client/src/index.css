@@ -1,16 +1,310 @@
+:root {
+  --bg-primary: #151718;
+  --bg-secondary: #1c1e1f;
+  --accent-color: #4cd964;
+  --text-primary: #ffffff;
+  --text-secondary: #8b949e;
+  --border-color: #2a2d2e;
+  --input-bg: #1c1e1f;
+  --hover-bg: #252729;
+}
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-html, body {
-    min-height: 100vh;
-    background-color: #1a1d21;
-    color: #fff;
+html, body, #root {
+  min-height: 100vh;
+  background-color: #151718 !important;
+  color: #ffffff;
 }
 
-#root {
-    min-height: 100vh;
-    background-color: #1a1d21;
+.container {
+  padding: 2rem;
+  min-height: 100vh;
+  max-width: 1200px;
+}
+
+.card {
+  background-color: #1c1e1f !important;
+  border: 1px solid #2a2d2e !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  background-color: #1c1e1f !important;
+  border-bottom: 1px solid #2a2d2e !important;
+  padding: 1.25rem 1.5rem !important;
+}
+
+.card-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #ffffff;
+}
+
+.card-body {
+  padding: 0 !important;
+}
+
+.form-control, .form-select {
+  background-color: #1c1e1f !important;
+  border: 1px solid #2a2d2e !important;
+  color: #ffffff !important;
+  padding: 0.875rem 1rem !important;
+  border-radius: 8px !important;
+  height: auto !important;
+  font-size: 0.95rem;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: #1c1e1f !important;
+  border-color: #4cd964 !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+.form-control::placeholder {
+  color: #6c757d !important;
+}
+
+.form-label {
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-success {
+  background-color: #4cd964 !important;
+  border-color: #4cd964 !important;
+  color: #000000 !important;
+}
+
+.btn-success:hover {
+  background-color: #3cbd53 !important;
+  border-color: #3cbd53 !important;
+}
+
+.btn-icon {
+  padding: 6px;
+  line-height: 1;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+}
+
+.btn-icon:hover {
+  color: #ffffff;
+  background-color: #252729;
+}
+
+.btn-icon.btn-danger {
+  color: #ff3b30;
+}
+
+.btn-icon.btn-danger:hover {
+  background-color: rgba(255, 59, 48, 0.1);
+}
+
+.btn-outline-light {
+  border-color: #2a2d2e !important;
+  color: #ffffff !important;
+}
+
+.btn-outline-light:hover {
+  background-color: #2a2d2e !important;
+  border-color: #2a2d2e !important;
+}
+
+.btn-action {
+  background-color: #2a2d2e;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.btn-action:hover {
+  background-color: #3a3d3e;
+  transform: translateY(-1px);
+}
+
+.btn-action .text-success {
+  color: #4cd964 !important;
+}
+
+.btn-action .text-danger {
+  color: #ff4d4f !important;
+}
+
+.btn-action:hover .text-success {
+  color: #5de973 !important;
+  box-shadow: 0 0 10px rgba(76, 217, 100, 0.2);
+  border-color: #4cd964;
+}
+
+.btn-action:hover .text-danger {
+  color: #ff6b6d !important;
+  box-shadow: 0 0 10px rgba(255, 77, 79, 0.2);
+  border-color: #ff4d4f;
+}
+
+.btn-action:has(.text-success):hover {
+  box-shadow: 0 4px 12px rgba(76, 217, 100, 0.2);
+  border-color: #4cd964;
+}
+
+.btn-action:has(.text-danger):hover {
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.2);
+  border-color: #ff4d4f;
+}
+
+.btn-action-danger {
+  background-color: #2a2d2e;
+  border: 1px solid #3a3d3e;
+  color: #ff4d4f;
+}
+
+.btn-action-danger:hover {
+  background-color: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.table-responsive {
+  background-color: #1c1e1f;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.table {
+  color: #ffffff !important;
+  margin-bottom: 0 !important;
+}
+
+.table thead th {
+  background-color: #1c1e1f !important;
+  color: #ffffff;
+  border-bottom: 1px solid #2a2d2e !important;
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tbody td {
+  border-bottom: 1px solid #2a2d2e !important;
+  padding: 1rem 1.5rem;
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+.table tbody tr:hover td {
+  background-color: #252729 !important;
+}
+
+.profile-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #2a2d2e;
+}
+
+.subtitle {
+  color: #8b949e;
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.form-check-input {
+  background-color: #1c1e1f !important;
+  border-color: #2a2d2e !important;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.form-check-input:checked {
+  background-color: #4cd964 !important;
+  border-color: #4cd964 !important;
+}
+
+.form-check-label {
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #151718;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2d2e;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8b949e;
+}
+
+/* Alert styling */
+.alert {
+  background-color: #252729 !important;
+  border: 1px solid #2a2d2e !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.alert-danger {
+  border-left: 4px solid #ff3b30 !important;
+}
+
+/* Spacing utilities */
+.gap-2 {
+  gap: 0.5rem !important;
+}
+
+/* Override Bootstrap background colors */
+.bg-dark {
+  background-color: #1c1e1f !important;
+}
+
+.table-dark {
+  background-color: #1c1e1f !important;
+}
+
+.border-secondary {
+  border-color: #2a2d2e !important;
+}
+
+/* Custom Shadows */
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
