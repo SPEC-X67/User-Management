@@ -6,7 +6,7 @@ export const getAllUsers = createAsyncThunk(
     'users/getAllUsers',
     async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/v1/users');
+            const response = await axios.get('http://localhost:5000/api/admin/users');
             return response.data;
         } catch (error) {
             throw error.response.data;
@@ -19,7 +19,7 @@ export const registerUser = createAsyncThunk(
     'users/registerUser',
     async (userData) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/v1/users', userData);
+            const response = await axios.post('http://localhost:5000/api/admin/users', userData);
             return response.data;
         } catch (error) {
             throw error.response.data;

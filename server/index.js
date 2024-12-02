@@ -1,7 +1,7 @@
 import express from "express";
 import cors from 'cors';
 import connectToMongo from "./config/db.js";
-import userRoutes from './routes/user.js'
+import adminRoutes from './routes/adminRoute.js'
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -14,7 +14,7 @@ app.use('/public', express.static('public'));
 
 // Routes
 
-app.use("/api/v1", userRoutes)
+app.use("/api/admin", adminRoutes)
 
 app.listen(PORT, () => {
     console.log(`Api is running on http://localhost:${PORT}`)

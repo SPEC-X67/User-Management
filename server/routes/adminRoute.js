@@ -1,5 +1,5 @@
 import express from "express";
-import userController from "../controllers/user.js";
+import userController from "../controllers/adminController.js";
 import multer from "multer";
 const router = express.Router();
 
@@ -23,7 +23,6 @@ const upload = multer({
         }
     },
 });
-
 
 router.get("/users", userController.getAllUsers);
 router.post("/users", upload.single('profile'), userController.createNewUser)
