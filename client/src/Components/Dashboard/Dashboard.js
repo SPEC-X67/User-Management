@@ -13,10 +13,10 @@ const Dashboard = () => {
   }, [dispatch]);
 
   const filteredUsers = users?.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.gender.toLowerCase() === searchTerm.toLowerCase()
+    (user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user?.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user?.gender?.toLowerCase() === searchTerm.toLowerCase())
   );
 
   const getProfileImageUrl = (profileImage) => {

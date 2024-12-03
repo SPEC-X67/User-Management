@@ -41,7 +41,7 @@ const Adduser = () => {
 
     try {
       await dispatch(registerUser(data)).unwrap();
-      navigate('/');
+      navigate('/admin');
     } catch (error) {
       console.error('Failed to register user:', error);
     } finally {
