@@ -7,7 +7,7 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading, error, isAuthenticated } = useSelector((state) => state.user);
-  
+  console.log(isAuthenticated);
   const [formData, setFormData] = useState({
     email: '',
     password: ''

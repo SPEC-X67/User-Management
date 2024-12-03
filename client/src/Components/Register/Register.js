@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../../redux/reducers/user/userSlice';
 
 const Register = () => {
+
+  const {loading, error, isAuthenticated} = useSelector(state => state.user);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,10 +15,15 @@ const Register = () => {
     profile: null
   });
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [loading, setLoading] = useState(false);
-
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/home');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -35,7 +42,6 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
     const data = new FormData();
     Object.keys(formData).forEach(key => {
@@ -47,8 +53,6 @@ const Register = () => {
       navigate('/');
     } catch (error) {
       console.error("Failed to register", error)
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -8,7 +8,6 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -67,15 +66,6 @@ const Home = () => {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-vh-100 d-flex justify-content-center align-items-center bg-dark">
-        <div className="alert alert-warning" role="alert">
-          No user data available. Please try again later.
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -129,7 +119,7 @@ const Home = () => {
                       <div className="card bg-success bg-opacity-10 border-success h-100">
                         <div className="card-body p-4">
                           <div className="d-flex align-items-center mb-3">
-                            <div className="rounded-circle bg-success p-3 me-3">
+                            <div className="rounded-circle bg-success p-3 me-3" style={{ width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <i className={`${action.icon} text-dark fs-4`}></i>
                             </div>
                             <h5 className="fw-bold text-white mb-0">{action.title}</h5>
