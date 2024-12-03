@@ -78,7 +78,18 @@ class userController {
     };
 
     static homeLoad = async (req, res) => {
-        
+        try {
+            const user = req.user; // Assuming user is set by the `checkIsUserAuthenticated` middleware
+            res.status(200).json({
+                name: user.name,
+                email: user.email,
+                city: user.city,
+                gender: user.gender,
+                profile: user.profile, // Ensure this field exists in the user model
+            });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to load user data' });
+        } 
     }
 }
 

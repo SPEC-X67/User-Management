@@ -34,6 +34,6 @@ const upload = multer({
 
 router.post("/users/register", upload.single('profile'), userController.userRegistration);
 router.post("/users/login", userController.userLogin);
-router.post("/users/home", checkIsUserAuthenticated, userController.homeLoad);
+router.get("/users/home", checkIsUserAuthenticated, userController.homeLoad);
 
 export default router;

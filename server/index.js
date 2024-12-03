@@ -19,21 +19,17 @@ if (!fs.existsSync(uploadsDir)) {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-connectToMongo();
-
+// Middleware
 app.use(cors());
 app.use(express.json());
-
-// Serve uploaded files
-app.use('/uploads', express.static(uploadsDir));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.get("/", (req, res) => {
-    res.send("Working");
-});
+app.use('/api/auth/', userRoutes);
+app.use('/api/admin/', adminRoutes);
 
-app.use("/api/auth", userRoutes)
-app.use("/api/admin", adminRoutes)
+// Connect to MongoDB
+connectToMongo();
 
 app.listen(PORT, () => {
     console.log(`Api is running on http://localhost:${PORT}`)

@@ -33,9 +33,18 @@ const adminSlice = createSlice({
     initialState: {
         users: [],
         loading: false,
-        error: null
+        error: null,
+        isAuthenticated: false,
+        currentAdmin: null
     },
-    reducers: {},
+    reducers: {
+        logout: (state) => {
+            state.currentAdmin = null;
+            state.isAuthenticated = false;
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminName');
+        }
+    },
     extraReducers: (builder) => {
         builder
             // getAllUsers cases
@@ -67,4 +76,5 @@ const adminSlice = createSlice({
     }
 });
 
+export const { logout } = adminSlice.actions;
 export default adminSlice.reducer;

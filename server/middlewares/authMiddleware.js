@@ -10,7 +10,7 @@ const checkIsUserAuthenticated = async (req, res, next) => {
             // verify token
             const { userID } = jwt.verify(token, "deBySpeczin");
             // get User from Token
-            req.user = await userModel.findById(userID).select("--password");
+            req.user = await userModel.findById(userID).select("-password");
             next();
         } catch (error) {
             return res.status(401).json({message: "unAuthorized User"});
