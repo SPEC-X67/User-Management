@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../redux/reducers/userSlice';
+import { registerUser } from '../../redux/reducers/userSlice';
 
-const Register = () => {
+const Adduser = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -234,7 +234,7 @@ const Register = () => {
                   <button
                     type="button"
                     className="btn btn-outline-light px-4"
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/admin')}
                   >
                     Cancel
                   </button>
@@ -248,4 +248,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Adduser;

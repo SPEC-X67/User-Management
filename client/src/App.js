@@ -1,8 +1,8 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route} from 'react-router-dom'
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import Register from './Components/Register.js';
-import Home from './pages/Home.js';
+import Adduser from './pages/admin/Adduser.js';
+import Dashbord from './pages/admin/Dashboard.js';
 import './index.css'
 
 function App() {
@@ -10,8 +10,8 @@ function App() {
     <>
     <BrowserRouter>
       <Routes>
-        <Route path='/admin' element={<Home/>}/>
-        <Route path='/admin/adduser' element={<Register/>}/>
+        <Route path='/admin' element={<Dashbord/>}/>
+        <Route path='/admin/adduser' element={<Adduser/>}/>
       </Routes>
     </BrowserRouter>
     </>

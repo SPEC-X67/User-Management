@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { getAllUsers } from '../redux/reducers/userSlice';
+import { getAllUsers } from '../../redux/reducers/userSlice';
 
-const Home = () => {
+const Dashboard = () => {
   const dispatch = useDispatch();
   const { users, loading, error } = useSelector((state) => state.users);
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,16 +34,6 @@ const Home = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="container mt-4">
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container py-4 mt-5">
       <div className="card bg-dark border-0">
@@ -52,7 +42,7 @@ const Home = () => {
             <h2 className="h4 mb-1 text-white">User Management</h2>
             <p className="text-secondary small mb-0">Manage users in seconds</p>
           </div>
-          <Link to="/register" className="btn btn-success d-flex align-items-center gap-2">
+          <Link to="/admin/adduser" className="btn btn-success d-flex align-items-center gap-2">
             <i className="fas fa-plus"></i>
             New User
           </Link>
@@ -124,4 +114,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Dashboard;
