@@ -1,4 +1,5 @@
 import userModel from '../models/user.js'
+import bcryptjs from 'bcryptjs'
 
 class userController {
     static getAllUsers = async(req, res) => {
@@ -22,12 +23,16 @@ class userController {
                 return res.status(400).json({ message: "Email already exists" });
             }
 
+            // Hash password
+            const salt = await bcryptjs.genSalt(10);
+            const hashedPassword = await bcryptjs.hash(password, salt);
+
             const profileImage = req.file ? req.file.filename : null;
             
             const newUser = new userModel({
                 name,
                 email,
-                password,
+                password: hashedPassword,
                 gender,
                 city,
                 profile: profileImage,

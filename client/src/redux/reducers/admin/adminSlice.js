@@ -3,32 +3,33 @@ import axios from 'axios';
 
 // Async thunk for fetching all users
 export const getAllUsers = createAsyncThunk(
-    'users/getAllUsers',
+    'admin/getAllUsers',
     async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/admin/users');
-            return response.data;
-        } catch (error) {
-            throw error.response.data;
-        }
+      try {
+        const response = await axios.get('http://localhost:5000/api/admin/users');
+        return response.data;
+      } catch (error) {
+        throw error.response.data;
+      }
     }
-);
+  );
 
 // Async thunk for registering a new user
-export const registerUser = createAsyncThunk(
-    'users/registerUser',
+export const addUser = createAsyncThunk(
+    'admin/addUser',
     async (userData) => {
         try {
             const response = await axios.post('http://localhost:5000/api/admin/users', userData);
-            return response.data;
+            return response.data.user; // Return just the user data
         } catch (error) {
             throw error.response.data;
         }
     }
 );
 
-const userSlice = createSlice({
-    name: 'users',
+
+const adminSlice = createSlice({
+    name: 'admin',
     initialState: {
         users: [],
         loading: false,
@@ -51,19 +52,19 @@ const userSlice = createSlice({
                 state.error = action.error.message;
             })
             // registerUser cases
-            .addCase(registerUser.pending, (state) => {
+            .addCase(addUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(registerUser.fulfilled, (state, action) => {
+            .addCase(addUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.users.push(action.payload);
             })
-            .addCase(registerUser.rejected, (state, action) => {
+            .addCase(addUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
             });
     }
 });
 
-export default userSlice.reducer;
+export default adminSlice.reducer;

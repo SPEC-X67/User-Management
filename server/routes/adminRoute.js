@@ -1,30 +1,37 @@
 import express from "express";
 import userController from "../controllers/adminController.js";
 import multer from "multer";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const router = express.Router();
 
+// Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads');
+        cb(null, path.join(__dirname, '../uploads'));
     },
     filename: function (req, file, cb) {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    },
+        const uniqueSuffix = Date.now();
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
 });
 
-const upload = multer({
+const upload = multer({ 
     storage,
     fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (allowedTypes.includes(file.mimetype)) {
+        if (file.mimetype.startsWith('image/')) {
             cb(null, true);
         } else {
-            cb(new Error('Invalid file type. Only JPEG, PNG, and WEBP are allowed.'));
+            cb(new Error('Only image files are allowed'));
         }
-    },
+    }
 });
 
 router.get("/users", userController.getAllUsers);
-router.post("/users", upload.single('profile'), userController.createNewUser)
+router.post("/users", upload.single('profile'), userController.createNewUser);
 
 export default router;

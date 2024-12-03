@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { registerUser } from '../../redux/reducers/userSlice';
+import { registerUser } from '../../redux/reducers/user/userSlice';
 
 const Register = () => {
   const [formData, setFormData] = useState({

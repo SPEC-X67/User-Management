@@ -15,7 +15,7 @@ class userController {
                 return res.status(400).json({ message: "Email already exists" });
             }
 
-            const genSalt = await bcryptjs.genSalt(20);
+            const genSalt = await bcryptjs.genSalt(10);
             const hashedPassword = await bcryptjs.hash(password, genSalt)
 
             const profileImage = req.file ? req.file.filename : null;
@@ -56,7 +56,13 @@ class userController {
                         const token = jwt.sign({userID : isUser._id}, "deBySpeczin", {
                             expiresIn : "2d",
                         });
-                        return res.status(200).json({message: "Login Successfully", token})
+                        return res
+                        .status(200)
+                        .json({
+                            message: "Login Successfully",
+                            token,
+                            name : isUser.name,
+                        })
                     } else {
                         return res.status(400).json({message: "Invalid Credentials!"})
                     }

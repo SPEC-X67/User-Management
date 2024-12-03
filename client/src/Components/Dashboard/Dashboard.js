@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { getAllUsers } from '../../redux/reducers/userSlice';
+import { getAllUsers } from '../../redux/reducers/admin/adminSlice';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { users, loading, error } = useSelector((state) => state.users);
+  const { users, loading, error } = useSelector((state) => state.admin);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Dashboard = () => {
 
   const getProfileImageUrl = (profileImage) => {
     if (!profileImage) return 'https://via.placeholder.com/40';
-    return `http://localhost:5000/public/uploads/${profileImage}`;
+    return `http://localhost:5000/uploads/${profileImage}`;
   };
 
   if (loading) {

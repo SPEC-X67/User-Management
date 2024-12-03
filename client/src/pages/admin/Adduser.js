@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../../redux/reducers/userSlice';
+import { addUser } from '../../redux/reducers/admin/adminSlice';
 
 const Adduser = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +13,7 @@ const Adduser = () => {
     profile: null
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   
   const dispatch = useDispatch();
@@ -20,6 +21,7 @@ const Adduser = () => {
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(null); // Clear error when user types
   };
 
   const handleFileChange = (e) => {
@@ -27,12 +29,21 @@ const Adduser = () => {
     if (file) {
       setFormData({ ...formData, profile: file });
       setPreviewUrl(URL.createObjectURL(file));
+      setError(null); // Clear error when user changes file
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    
+    // Validate all required fields
+    if (!formData.name || !formData.email || !formData.password || !formData.gender || !formData.city) {
+      setError('All fields are required');
+      setLoading(false);
+      return;
+    }
     
     const data = new FormData();
     Object.keys(formData).forEach(key => {
@@ -40,10 +51,11 @@ const Adduser = () => {
     });
 
     try {
-      await dispatch(registerUser(data)).unwrap();
-      navigate('/admin');
+      await dispatch(addUser(data)).unwrap();
+      navigate('/admin/dashboard');
     } catch (error) {
       console.error('Failed to register user:', error);
+      setError(error.message || 'Failed to register user. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -61,6 +73,11 @@ const Adduser = () => {
               </div>
 
               <form onSubmit={handleSubmit}>
+                {error && (
+                  <div className="alert alert-danger" role="alert">
+                    {error}
+                  </div>
+                )}
                 <div className="text-center mb-4">
                   <div className="position-relative d-inline-block">
                     <img
@@ -234,7 +251,7 @@ const Adduser = () => {
                   <button
                     type="button"
                     className="btn btn-outline-light px-4"
-                    onClick={() => navigate('/admin')}
+                    onClick={() => navigate('/admin/dashboard')}
                   >
                     Cancel
                   </button>
