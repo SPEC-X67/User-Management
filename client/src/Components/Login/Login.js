@@ -1,15 +1,27 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../../redux/reducers/user/userSlice';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error, isAuthenticated } = useSelector((state) => state.user);
+  
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/home');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
+    dispatch(loginUser(formData));
   };
 
   const handleChange = (e) => {
@@ -27,6 +39,12 @@ const Login = () => {
             <h2 className="fw-bold mb-2">Welcome Back!</h2>
             <p className="text-secondary">Please sign in to continue</p>
           </div>
+
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
@@ -67,9 +85,17 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-success w-100 py-2 mb-3">
-              <i className="fas fa-sign-in-alt me-2"></i>
-              Sign In
+            <button 
+              type="submit" 
+              className="btn btn-success w-100 py-2 mb-3"
+              disabled={loading}
+            >
+              {loading ? (
+                <i className="fas fa-spinner fa-spin me-2"></i>
+              ) : (
+                <i className="fas fa-sign-in-alt me-2"></i>
+              )}
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
 
             <div className="text-center">
