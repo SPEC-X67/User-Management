@@ -43,6 +43,7 @@ class userController {
             });
         }
     };
+
     static userLogin = async (req, res) => {
         const {email, password} = req.body;
 
@@ -68,6 +69,10 @@ class userController {
         } catch (error) {
             return res.status(400).json({message: error.message})
         }
+    };
+
+    static homeLoad = async (req, res) => {
+        
     }
 }
 

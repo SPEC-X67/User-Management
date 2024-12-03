@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { registerUser } from '../../redux/reducers/userSlice';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +13,10 @@ const Register = () => {
     profile: null
   });
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -27,9 +33,23 @@ const Register = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle registration logic here
+    setLoading(true);
+
+    const data = new FormData();
+    Object.keys(formData).forEach(key => {
+      data.append(key, formData[key]);
+    });
+
+    try {
+      await dispatch(registerUser(data)).unwrap();
+      navigate('/');
+    } catch (error) {
+      console.error("Failed to register", error)
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,7 +62,6 @@ const Register = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* Profile Image Upload */}
             <div className="text-center mb-4">
               <div className="position-relative d-inline-block">
                 <img
@@ -186,9 +205,12 @@ const Register = () => {
                 border: 'none',
                 boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)'
               }}
-            >
-              <i className="fas fa-user-plus me-2"></i>
-              Create Account
+            > {loading ? ("Registering...") : (
+              <>              
+                <i className="fas fa-user-plus me-2"></i>
+                Create Account
+              </>
+            ) }
             </button>
 
             <div className="text-center">
