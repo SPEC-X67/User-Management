@@ -6,9 +6,9 @@ const api = axios.create({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
 });
 
-export const loginUser = createAsyncThunk('user/loginUser', async (credentials, { rejectWithValue }) => {
+export const loginUser = createAsyncThunk('user/loginUser', async (userData, { rejectWithValue }) => {
   try {
-    const response = await api.post('/auth/users/login', credentials);
+    const response = await api.post('/auth/users/login', userData);
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('userName', response.data.name);
     return response.data;
@@ -44,7 +44,8 @@ const userSlice = createSlice({
         error: null,
         isAuthenticated: false
       });
-      localStorage.clear();
+      localStorage.removeItem('token')
+      localStorage.removeItem('userName')
     }
   },
   extraReducers: (builder) => {

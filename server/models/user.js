@@ -18,6 +18,10 @@ const newSchema = new mongoose.Schema({
     },
     profile: {
         type: String
+    },
+    role: {
+        type: String,
+        default: "user"
     }
 });
 

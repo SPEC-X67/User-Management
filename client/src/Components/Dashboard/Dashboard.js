@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getAllUsers } from '../../redux/reducers/admin/adminSlice';
 
 const Dashboard = () => {
+
+  const navigate= useNavigate();
   const dispatch = useDispatch();
-  const { users, loading, error } = useSelector((state) => state.admin);
+  const { users, loading, isAuthenticated} = useSelector((state) => state.admin);
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    if(!isAuthenticated) {
+      navigate('/admin');
+    }
+  },[isAuthenticated, navigate])
 
   useEffect(() => {
     dispatch(getAllUsers());

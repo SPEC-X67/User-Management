@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { loginAdmin } from '../../redux/reducers/admin/adminSlice';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error, isAuthenticated } = useSelector((state) => state.admin);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if(isAuthenticated) {
+      navigate('/admin/dashboard');
+    }
+  }, [isAuthenticated, navigate, dispatch]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement admin login logic
-    navigate('/admin');
+    try {
+      await dispatch(loginAdmin(formData)).unwrap();
+      navigate('/admin/dashboard');
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
   };
 
   const handleChange = (e) => {
@@ -32,6 +46,12 @@ const AdminLogin = () => {
             <h2 className="fw-bold mb-2">Admin Login</h2>
             <p className="text-secondary">Access admin dashboard</p>
           </div>
+
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
@@ -80,9 +100,14 @@ const AdminLogin = () => {
                 border: 'none',
                 boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)'
               }}
+              disabled={loading}
             >
-              <i className="fas fa-sign-in-alt me-2"></i>
-              Access Dashboard
+              {loading ? (
+                 <i className="fas fa-spinner fa-spin me-2"></i>
+              ) : (
+                <i className="fas fa-sign-in-alt me-2"></i>
+              )}
+              {loading ? 'Loging..' : 'Access Dashboard'}
             </button>
           </form>
         </div>

@@ -13,10 +13,10 @@ const checkIsUserAuthenticated = async (req, res, next) => {
             req.user = await userModel.findById(userID).select("-password");
             next();
         } catch (error) {
-            return res.status(401).json({message: "unAuthorized User"});
+            return res.status(401).json({message: "Unauthorized: Invalid or expired token"});
         }
     } else {
-        return res.status(401).json({message: "unAuthorized User"});
+        return res.status(401).json({message: "Unauthorized: No token provided"});
     }
 }
 

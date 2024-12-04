@@ -1,5 +1,6 @@
 import userModel from '../models/user.js'
 import bcryptjs from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 class userController {
     static getAllUsers = async(req, res) => {
@@ -36,6 +37,7 @@ class userController {
                 gender,
                 city,
                 profile: profileImage,
+                role: "user"
             });
 
             const savedUser = await newUser.save();
@@ -50,6 +52,47 @@ class userController {
                 message: "Error creating user",
                 error: error.message
             });
+        }
+    }
+
+    static adminLogin = async(req, res) => {
+        const { email, password } = req.body;
+        try {
+            if (!email || !password) {
+                return res.status(400).json({ message: "All fields are required" });
+            }
+
+            const user = await userModel.findOne({ email });
+            if (!user) {
+                return res.status(401).json({ message: "Invalid email or password" });
+            }
+
+            if (user.role !== "admin") {
+                return res.status(403).json({ message: "Access denied. Admin only." });
+            }
+
+            const isMatch = await bcryptjs.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ message: "Invalid email or password" });
+            }
+
+            // Generate admin token
+            const adminToken = jwt.sign(
+                { userID: user._id, role: user.role },
+                "deBySpeczin",
+                { expiresIn: "1d" }
+            );
+
+            return res.status(200).json({
+                message: "Admin login successful",
+                adminToken,
+                name: user.name,
+                role: user.role
+            });
+
+        } catch (error) {
+            console.error("Admin login error:", error);
+            return res.status(500).json({ message: "Server error during login" });
         }
     }
 }

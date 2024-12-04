@@ -23,12 +23,12 @@ const Header = ({ isAdmin }) => {
       <div className="container-fluid" style={{height: "50px"}}>
         <h1 className="navbar-brand fw-bold fs-4 mx-2" >WoiTap</h1>
         <button className="btn btn-outline-light" onClick={handleLogout}>
-            <i className="fas fa-sign-out-alt me-2"></i>
-            Logout
-          </button>
-        </div>
+          <i className="fas fa-sign-out-alt me-2"></i>
+          Logout
+        </button>
+      </div>
     </nav>
   )
 }
 
-export default Header
+export default Header;

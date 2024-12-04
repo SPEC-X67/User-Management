@@ -1,5 +1,6 @@
 import express from "express";
 import userController from "../controllers/adminController.js";
+import checkIsUserAuthenticated from "../middlewares/authMiddleware.js"
 import multer from "multer";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -31,7 +32,11 @@ const upload = multer({
     }
 });
 
-router.get("/users", userController.getAllUsers);
-router.post("/users", upload.single('profile'), userController.createNewUser);
+// Public routes
+router.post("/login", userController.adminLogin);
+
+// Protected routes (require authentication)
+router.get("/users", checkIsUserAuthenticated, userController.getAllUsers);
+router.post("/users", checkIsUserAuthenticated, upload.single('profile'), userController.createNewUser);
 
 export default router;

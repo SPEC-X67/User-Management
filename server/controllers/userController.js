@@ -27,6 +27,7 @@ class userController {
                 gender,
                 city,
                 profile: profileImage,
+                role: "user",
             });
 
             const savedUser = await newUser.save();
