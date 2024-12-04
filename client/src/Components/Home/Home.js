@@ -40,7 +40,7 @@ const Home = () => {
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [navigate, showEditModal]);
 
   // Helper to get profile image URL
   const getProfileImageUrl = (profileImage) =>

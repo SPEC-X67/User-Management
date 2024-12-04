@@ -18,7 +18,6 @@ const EditProfile = ({ show, onHide, userData }) => {
 
   const dispatch = useDispatch();
 
-  // Populate form when userData changes
   useEffect(() => {
     console.log("User Data:", userData._id);
     if (userData) {
