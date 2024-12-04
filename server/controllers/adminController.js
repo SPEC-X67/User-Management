@@ -95,6 +95,50 @@ class userController {
             return res.status(500).json({ message: "Server error during login" });
         }
     }
+
+    static EditUser = async(req, res) => {
+        try {
+            const {id} = req.params;
+            
+            // Check if user exists
+            const user = await userModel.findById(id);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            let userData = {
+                name: req.body.name,
+                email: req.body.email,
+                gender: req.body.gender,
+                city: req.body.city
+            }
+    
+            // Handle profile image
+            if (req.file) {
+                userData.profile = req.file.filename;
+            }
+
+            // Handle password
+            if (req.body.password) {
+                const salt = await bcryptjs.genSalt(10);
+                const hashedPassword = await bcryptjs.hash(req.body.password, salt);
+                userData.password = hashedPassword;
+            }
+
+            // Update user and get updated document
+            const updatedUser = await userModel.findByIdAndUpdate(
+                id, 
+                userData,
+                { new: true } // Return updated document
+            );
+
+            return res.status(200).json(updatedUser);
+
+        } catch (error) {
+            console.error("Error updating user:", error);
+            return res.status(500).json({ message: "Error updating user", error: error.message });
+        }
+    }
 }
 
 export default userController;

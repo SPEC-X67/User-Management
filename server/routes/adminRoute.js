@@ -38,5 +38,6 @@ router.post("/login", userController.adminLogin);
 // Protected routes (require authentication)
 router.get("/users", checkIsUserAuthenticated, userController.getAllUsers);
 router.post("/users", checkIsUserAuthenticated, upload.single('profile'), userController.createNewUser);
+router.put("/users/edituser/:id", checkIsUserAuthenticated, upload.single('profile'), userController.EditUser);
 
 export default router;

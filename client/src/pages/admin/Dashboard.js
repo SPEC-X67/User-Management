@@ -5,7 +5,7 @@ import Header from '../../Components/Header/Header'
 const Dashbord = () => {
   return (
     <>
-      <Header/>
+      <Header isAdmin={true} />
       <Dashboard/>
     </>
   )

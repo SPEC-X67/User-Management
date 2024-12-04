@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getAllUsers } from '../../redux/reducers/admin/adminSlice';
+import AddUser from '../../pages/admin/Adduser';
+import EditUser from '../../pages/admin/Edituser';
 
 const Dashboard = () => {
 
@@ -9,16 +11,17 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const { users, loading, isAuthenticated} = useSelector((state) => state.admin);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null); 
 
   useEffect(() => {
     if(!isAuthenticated) {
       navigate('/admin');
+      return
     }
-  },[isAuthenticated, navigate])
-
-  useEffect(() => {
     dispatch(getAllUsers());
-  }, [dispatch]);
+  },[isAuthenticated, navigate, dispatch]);
 
   const filteredUsers = users?.filter(user => 
     (user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -43,6 +46,7 @@ const Dashboard = () => {
   }
 
   return (
+    <>
     <div className="container py-4 mt-5">
       <div className="card bg-dark border-0">
         <div className="card-header bg-dark border-0 d-flex justify-content-between align-items-center py-4">
@@ -50,10 +54,10 @@ const Dashboard = () => {
             <h2 className="h4 mb-1 text-white">User Management</h2>
             <p className="text-secondary small mb-0">Manage users in seconds</p>
           </div>
-          <Link to="/admin/adduser" className="btn btn-success d-flex align-items-center gap-2">
+          <button className="btn btn-success d-flex align-items-center gap-2" onClick={() => setShowAddModal(true)}>
             <i className="fas fa-plus"></i>
             New User
-          </Link>
+          </button>
         </div>
 
         <div className="px-4 pb-3">
@@ -97,7 +101,15 @@ const Dashboard = () => {
                   <td>{user.city}</td>
                   <td className="text-end pe-4">
                     <div className="d-flex gap-2 justify-content-end">
-                      <button className="btn btn-icon btn-action" style={{ border: '1px solid #4cd964'}}>
+                      <button 
+                       className="btn btn-icon btn-action"
+                       style={{
+                          border: '1px solid #4cd964'
+                        }}
+                       onClick={() => {
+                        setShowEditModal(true) 
+                        setSelectedUser(user)}}
+                       >
                         <i className="fas fa-edit text-success"></i>
                       </button>
                       <button className="btn btn-icon btn-action" style={{ border: '1px solid #ff4d4f'}}>
@@ -119,7 +131,13 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
-  );
+    <AddUser show={showAddModal} onHide={() => setShowAddModal(false)}/>
+    <EditUser show={showEditModal} onHide={() => {
+      setShowEditModal(false);
+      setSelectedUser(null)}}
+      userData={selectedUser}/>
+    </>
+    );
 };
 
 export default Dashboard;

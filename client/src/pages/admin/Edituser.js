@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { addUser } from "../../redux/reducers/admin/adminSlice";
+import { updateUser } from "../../redux/reducers/admin/adminSlice";
 
-const AddUser = ({ show, onHide }) => {
+const EditUser = ({ show, onHide, userData }) => {
   // Form state
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
+    password: "", // Optional for edit
     gender: "",
     city: "",
     profile: null,
@@ -17,6 +17,22 @@ const AddUser = ({ show, onHide }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const dispatch = useDispatch();
+
+  // Populate form when userData changes
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        name: userData.name || "",
+        email: userData.email || "",
+        password: "", // Empty by default for edit
+        gender: userData.gender || "",
+        city: userData.city || "",
+        profile: null,
+      });
+      // Set preview URL from existing profile
+      setPreviewUrl(userData.profile ? `http://localhost:5000/uploads/${userData.profile}` : null);
+    }
+  }, [userData]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -30,7 +46,6 @@ const AddUser = ({ show, onHide }) => {
     if (file) {
       setFormData({ ...formData, profile: file });
       setPreviewUrl(URL.createObjectURL(file));
-      setError(null);
     }
   };
 
@@ -40,41 +55,33 @@ const AddUser = ({ show, onHide }) => {
     setLoading(true);
     setError(null);
 
-    // Validate form
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.gender ||
-      !formData.city
-    ) {
-      setError("All fields are required");
+    // Validate form (password is optional for edit)
+    if (!formData.name || !formData.email || !formData.gender || !formData.city) {
+      setError("Name, email, gender, and city are required");
       setLoading(false);
       return;
     }
 
-    // Create FormData object
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
-    });
-
     try {
-      // Dispatch addUser action
-      await dispatch(addUser(data)).unwrap();
-      onHide();
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        gender: "",
-        city: "",
-        profile: null,
+      // Create FormData object
+      const data = new FormData();
+      
+      // Only append fields that are not empty
+      Object.keys(formData).forEach((key) => {
+        if (key === 'password' && !formData[key]) return; // Skip empty password
+        if (key === 'profile' && !formData[key]) return; // Skip if no new profile image
+        data.append(key, formData[key]);
       });
-      setPreviewUrl(null);
+
+      // Dispatch updateUser action with user ID
+      await dispatch(updateUser({ 
+        id: userData._id, 
+        data 
+      })).unwrap();
+      
+      onHide();
     } catch (error) {
-      setError(error.message || "Failed to register user. Please try again.");
+      setError(error || "Failed to update user. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -83,10 +90,10 @@ const AddUser = ({ show, onHide }) => {
   return (
     <div
       className={`modal fade ${show ? "show" : ""}`}
-      id="addUserModal"
+      id="editUserModal"
       tabIndex="-1"
       role="dialog"
-      aria-labelledby="addUserModalLabel"
+      aria-labelledby="editUserModalLabel"
       style={{ display: show ? "block" : "none" }}
       onClick={(e) => {
         if (e.target.className.includes("modal fade show")) {
@@ -102,8 +109,8 @@ const AddUser = ({ show, onHide }) => {
         <div className="modal-content bg-dark text-white">
           {/* Modal Header */}
           <div className="modal-header" style={{ borderStyle: "none" }}>
-            <h5 className="modal-title" id="addUserModalLabel">
-              Add New User
+            <h5 className="modal-title" id="editUserModalLabel">
+              Edit User
             </h5>
             <button
               type="button"
@@ -127,7 +134,7 @@ const AddUser = ({ show, onHide }) => {
               <div className="text-center mb-4">
                 <div className="position-relative d-inline-block">
                   <img
-                    src={previewUrl || "https://via.placeholder.com/150"}
+                    src={ previewUrl || `http://localhost:5000/uploads/${userData?.profile}` || "https://via.placeholder.com/150"}
                     alt="Profile Preview"
                     className="rounded-circle"
                     style={{
@@ -155,7 +162,6 @@ const AddUser = ({ show, onHide }) => {
                       className="d-none"
                       accept="image/*"
                       onChange={handleFileChange}
-                      name="profile"
                     />
                   </label>
                 </div>
@@ -246,10 +252,10 @@ const AddUser = ({ show, onHide }) => {
                   </div>
                 </div>
 
-                {/* Password Field */}
+                {/* Password Field (Optional) */}
                 <div className="form-group">
                   <label className="form-label text-secondary small">
-                    Password
+                    Password (Leave blank to keep unchanged)
                   </label>
                   <div className="input-group">
                     <span className="input-group-text bg-dark border-secondary">
@@ -258,7 +264,7 @@ const AddUser = ({ show, onHide }) => {
                     <input
                       type="password"
                       className="form-control bg-dark text-white border-secondary rounded-0 rounded-end"
-                      placeholder="Create password"
+                      placeholder="Enter new password (optional)"
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
@@ -285,12 +291,12 @@ const AddUser = ({ show, onHide }) => {
                     role="status"
                     aria-hidden="true"
                   ></span>
-                  Adding User...
+                  Updating User...
                 </>
               ) : (
                 <>
-                  <i className="fas fa-user-plus me-2"></i>
-                  Add User
+                  <i className="fas fa-edit me-2"></i>
+                  Update User
                 </>
               )}
             </button>
@@ -301,4 +307,4 @@ const AddUser = ({ show, onHide }) => {
   );
 };
 
-export default AddUser;
+export default EditUser;
