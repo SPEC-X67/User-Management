@@ -33,13 +33,15 @@ const Dashboard = () => {
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        await dispatch(deleteUser(userId)).unwrap();
-        // Optional: Show success message
-        alert('User deleted successfully');
+        const result = await dispatch(deleteUser(userId)).unwrap();
+        if (result && result.message) {
+          alert(result.message); // Show success message
+        }
       } catch (error) {
-        // Show error message to user
-        alert(error || 'Failed to delete user');
-        console.error('User deletion failed:', error);
+        // Show specific error message from backend or fallback message
+        const errorMessage = error?.message || error || 'Failed to delete user';
+        alert(errorMessage);
+        console.error('Delete user error:', errorMessage);
       }
     }
   };

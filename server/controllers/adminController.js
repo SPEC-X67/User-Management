@@ -144,6 +144,10 @@ class userController {
         try {
             const { id } = req.params;
             
+            if (!id) {
+                return res.status(400).json({ message: "User ID is required" });
+            }
+
             // Check if user exists
             const user = await userModel.findById(id);
             if (!user) {
@@ -152,23 +156,38 @@ class userController {
 
             // Delete user
             const deletedUser = await userModel.findByIdAndDelete(id);
-            
+            if (!deletedUser) {
+                return res.status(404).json({ message: "User not found or already deleted" });
+            }
+             
             // Delete user's profile image if it exists
             if (deletedUser.profile) {
-                const fs = require('fs');
-                const path = require('path');
-                const profilePath = path.join(__dirname, '../../uploads', deletedUser.profile);
-                if (fs.existsSync(profilePath)) {
-                    fs.unlinkSync(profilePath);
+                try {
+                    const fs = require('fs');
+                    const path = require('path');
+                    const profilePath = path.join(__dirname, '../../uploads', deletedUser.profile);
+                    if (fs.existsSync(profilePath)) {
+                        fs.unlinkSync(profilePath);
+                    }
+                } catch (fileError) {
+                    console.error("Error deleting profile image:", fileError);
+                    // Continue with the response even if image deletion fails
                 }
             }
 
             return res.status(200).json({ 
+                success: true,
                 message: "User deleted successfully", 
                 deletedUser 
             });
+
         } catch (error) {
-            return res.status(500).json({ message: "Error deleting user", error: error.message });
+            console.error("Delete user error:", error);
+            return res.status(500).json({ 
+                success: false,
+                message: "Error deleting user", 
+                error: error.message 
+            });
         }
     }
 }

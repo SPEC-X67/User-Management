@@ -61,7 +61,6 @@ const Login = () => {
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -80,7 +79,6 @@ const Login = () => {
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
