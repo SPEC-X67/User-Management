@@ -10,14 +10,14 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Create uploads directory if it doesn't exist
+// Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 // Middleware
 app.use(cors());
@@ -25,12 +25,12 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.use('/api/auth/', userRoutes);
-app.use('/api/admin/', adminRoutes);
+app.use('/api/auth', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Connect to MongoDB
 connectToMongo();
 
 app.listen(PORT, () => {
-    console.log(`Api is running on http://localhost:${PORT}`)
-})
+    console.log(`Server is running on http://localhost:${PORT}`);
+});

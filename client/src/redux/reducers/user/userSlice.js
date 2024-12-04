@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
-  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  baseURL: 'http://localhost:5000/api/auth',
 });
 
+// Add token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
 
 export const loginUser = createAsyncThunk('user/loginUser', async (userData, { rejectWithValue }) => {
   try {
-    const response = await api.post('/auth/users/login', userData);
+    const response = await api.post('/users/login', userData);
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('userName', response.data.name);
     return response.data;
@@ -27,7 +27,7 @@ export const loginUser = createAsyncThunk('user/loginUser', async (userData, { r
 
 export const registerUser = createAsyncThunk('user/registerUser', async (userData, { rejectWithValue }) => {
   try {
-    const response = await api.post('/auth/users/register', userData);
+    const response = await api.post('/users/register', userData);
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || 'Registration failed');
@@ -36,7 +36,7 @@ export const registerUser = createAsyncThunk('user/registerUser', async (userDat
 
 export const updateUserProfile = createAsyncThunk('user/updateUserProfile', async ({ id, data }, { rejectWithValue }) => {
   try {
-    const response = await api.put(`/auth/users/profile/${id}`, data);
+    const response = await api.put(`/users/profile/${id}`, data);
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || 'Failed to update user');
@@ -46,7 +46,7 @@ export const updateUserProfile = createAsyncThunk('user/updateUserProfile', asyn
 const userSlice = createSlice({
   name: 'user',
   initialState: {
-    currentUser: localStorage.getItem('userName') || null,
+    currentUser: null,
     users: [],
     loading: false,
     error: null,
@@ -54,15 +54,16 @@ const userSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
-      Object.assign(state, {
-        currentUser: null,
-        users: [],
-        loading: false,
-        error: null,
-        isAuthenticated: false
-      });
-      localStorage.removeItem('token')
-      localStorage.removeItem('userName')
+      state.currentUser = null;
+      state.users = [];
+      state.loading = false;
+      state.error = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+    },
+    clearError: (state) => {
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -93,22 +94,22 @@ const userSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      }).addCase(updateUserProfile.pending, (state) => {
+      })
+      .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
-    })
-    .addCase(updateUserProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.users = state.users.map(user => 
-          user._id === action.payload._id ? action.payload : user
-        );
       })
-    .addCase(updateUserProfile.rejected, (state, action) => {
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentUser = action.payload;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-    })
+      });
   }
 });
 
-export const { logout } = userSlice.actions;
+export const { logout, clearError } = userSlice.actions;
 export default userSlice.reducer;
