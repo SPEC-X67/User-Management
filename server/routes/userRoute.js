@@ -36,4 +36,7 @@ router.post("/users/register", upload.single('profile'), userController.userRegi
 router.post("/users/login", userController.userLogin);
 router.get("/users/home", checkIsUserAuthenticated, userController.homeLoad);
 
+// Add route to update user profile
+router.put('/users/profile/:id', checkIsUserAuthenticated, upload.single('profile'), userController.updateUserProfile);
+
 export default router;

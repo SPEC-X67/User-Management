@@ -6,6 +6,14 @@ const api = axios.create({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
 });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const loginUser = createAsyncThunk('user/loginUser', async (userData, { rejectWithValue }) => {
   try {
     const response = await api.post('/auth/users/login', userData);
@@ -23,6 +31,15 @@ export const registerUser = createAsyncThunk('user/registerUser', async (userDat
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || 'Registration failed');
+  }
+});
+
+export const updateUserProfile = createAsyncThunk('user/updateUserProfile', async ({ id, data }, { rejectWithValue }) => {
+  try {
+    const response = await api.put(`/auth/users/profile/${id}`, data);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || 'Failed to update user');
   }
 });
 
@@ -76,7 +93,20 @@ const userSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      }).addCase(updateUserProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+    })
+    .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.users = state.users.map(user => 
+          user._id === action.payload._id ? action.payload : user
+        );
+      })
+    .addCase(updateUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+    })
   }
 });
 

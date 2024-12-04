@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import EditProfile from '../../pages/user/EditProfile';
 
 const Home = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -98,7 +100,7 @@ const Home = () => {
                     {user.gender}
                   </span>
                 </div>
-                <button className="btn btn-outline-light w-100">
+                <button className="btn btn-outline-light w-100" onClick={() => setShowEditModal(true)}>
                   <i className="fas fa-edit me-2"></i>Edit Profile
                 </button>
               </div>
@@ -160,6 +162,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+      <EditProfile show={showEditModal} onHide={() => setShowEditModal(false)} userData={user} />
     </>
   );
 };
