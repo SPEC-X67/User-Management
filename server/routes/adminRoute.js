@@ -39,5 +39,6 @@ router.post("/login", userController.adminLogin);
 router.get("/users", checkIsUserAuthenticated, userController.getAllUsers);
 router.post("/users", checkIsUserAuthenticated, upload.single('profile'), userController.createNewUser);
 router.put("/users/edituser/:id", checkIsUserAuthenticated, upload.single('profile'), userController.EditUser);
+router.delete("/users/deleteuser/:id", checkIsUserAuthenticated, userController.deleteUser);
 
 export default router;

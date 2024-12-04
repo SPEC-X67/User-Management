@@ -76,6 +76,18 @@ export const updateUser = createAsyncThunk(
     }
 );
 
+export const deleteUser = createAsyncThunk(
+    'admin/deleteUser',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await api.delete(`/admin/users/deleteuser/${userId}`);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to delete user');
+        }
+    }
+);
+
 const adminSlice = createSlice({
     name: 'admin',
     initialState: {
@@ -148,6 +160,19 @@ const adminSlice = createSlice({
                 );
               })
             .addCase(updateUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(deleteUser.pending, (state) => { 
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.users = state.users.filter(user => user._id !== action.payload.deletedUser._id);
+                state.error = null;
+            })
+            .addCase(deleteUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });

@@ -139,6 +139,38 @@ class userController {
             return res.status(500).json({ message: "Error updating user", error: error.message });
         }
     }
+
+    static deleteUser = async(req, res) => {
+        try {
+            const { id } = req.params;
+            
+            // Check if user exists
+            const user = await userModel.findById(id);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            // Delete user
+            const deletedUser = await userModel.findByIdAndDelete(id);
+            
+            // Delete user's profile image if it exists
+            if (deletedUser.profile) {
+                const fs = require('fs');
+                const path = require('path');
+                const profilePath = path.join(__dirname, '../../uploads', deletedUser.profile);
+                if (fs.existsSync(profilePath)) {
+                    fs.unlinkSync(profilePath);
+                }
+            }
+
+            return res.status(200).json({ 
+                message: "User deleted successfully", 
+                deletedUser 
+            });
+        } catch (error) {
+            return res.status(500).json({ message: "Error deleting user", error: error.message });
+        }
+    }
 }
 
 export default userController;

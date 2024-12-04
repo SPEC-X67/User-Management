@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getAllUsers } from '../../redux/reducers/admin/adminSlice';
+import { getAllUsers, deleteUser } from '../../redux/reducers/admin/adminSlice';
 import AddUser from '../../pages/admin/Adduser';
 import EditUser from '../../pages/admin/Edituser';
 
@@ -29,6 +29,20 @@ const Dashboard = () => {
     user?.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user?.gender?.toLowerCase() === searchTerm.toLowerCase())
   );
+
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await dispatch(deleteUser(userId)).unwrap();
+        // Optional: Show success message
+        alert('User deleted successfully');
+      } catch (error) {
+        // Show error message to user
+        alert(error || 'Failed to delete user');
+        console.error('User deletion failed:', error);
+      }
+    }
+  };
 
   const getProfileImageUrl = (profileImage) => {
     if (!profileImage) return 'https://via.placeholder.com/40';
@@ -112,7 +126,13 @@ const Dashboard = () => {
                        >
                         <i className="fas fa-edit text-success"></i>
                       </button>
-                      <button className="btn btn-icon btn-action" style={{ border: '1px solid #ff4d4f'}}>
+                      <button 
+                      className="btn btn-icon btn-action" 
+                      style={{ 
+                        border: '1px solid #ff4d4f'
+                        }}
+                        onClick={() => handleDeleteUser(user._id)}
+                        >
                         <i className="fas fa-trash text-danger"></i>
                       </button>
                     </div>
