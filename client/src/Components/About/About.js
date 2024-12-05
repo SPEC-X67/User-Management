@@ -34,7 +34,7 @@ const About = () => {
           <div className="col-12">
             <div className="card bg-dark border-secondary">
               <div className="card-body p-4">
-                <h3 className="mb-4 text-white">Technology Stack</h3>
+                <h3 className="mb-4 text-white">Seamless User Management <br/> with MERN Stack.</h3>
                 <div className="row">
                   <div className="col-md-6">
                     <h5 className="text-success">Frontend</h5>
