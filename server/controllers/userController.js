@@ -93,46 +93,54 @@ class userController {
   // Update user profile
   static updateUserProfile = async (req, res) => {
     try {
-        const {id} = req.params;
-        if (!id) {
-            return res.status(400).json({ error: 'User ID is required' });
-        }
-        const user = await userModel.findById(id);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+      const { id } = req.params;
 
-        let userData = {
-            name: req.body.name,
-            email: req.body.email,
-            gender: req.body.gender,
-            city: req.body.city
-        }
+      const user = await userModel.findById(id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-        // Handle profile image
-        if (req.file) {
-            userData.profile = req.file.filename;
-        }
+      // Check if email exists for any other user
+      const existingUser = await userModel.findOne({
+        email: req.body.email,
+        _id: { $ne: id } // Exclude current user from check
+      });
 
-        // Handle password
-        if (req.body.password) {
-            const salt = await bcryptjs.genSalt(10);
-            const hashedPassword = await bcryptjs.hash(req.body.password, salt);
-            userData.password = hashedPassword;
-        }
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
 
-        // Update user and get updated document
-        const updatedUser = await userModel.findByIdAndUpdate(
-            id, 
-            userData,
-            { new: true } // Return updated document
-        );
+      let userData = {
+        name: req.body.name,
+        email: req.body.email,
+        gender: req.body.gender,
+        city: req.body.city
+      }
 
-        return res.status(200).json(updatedUser);
+      // Handle profile image
+      if (req.file) {
+        userData.profile = req.file.filename;
+      }
+
+      // Handle password
+      if (req.body.password) {
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPassword = await bcryptjs.hash(req.body.password, salt);
+        userData.password = hashedPassword;
+      }
+
+      // Update user and get updated document
+      const updatedUser = await userModel.findByIdAndUpdate(
+        id,
+        userData,
+        { new: true } // Return updated document
+      );
+
+      return res.status(200).json(updatedUser);
 
     } catch (error) {
-        console.error("Error updating user:", error);
-        return res.status(500).json({ message: "Error updating user", error: error.message });
+      console.error("Error updating user:", error);
+      return res.status(500).json({ message: "Error updating user", error: error.message });
     }
   }
 }

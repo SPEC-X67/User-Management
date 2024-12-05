@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../../redux/reducers/admin/adminSlice";
+import toast from 'react-hot-toast';
 
 const EditUser = ({ show, onHide, userData }) => {
   // Form state
@@ -12,9 +13,10 @@ const EditUser = ({ show, onHide, userData }) => {
     city: "",
     profile: null,
   });
-  const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const { loading, error: serverError } = useSelector((state) => state.admin);
 
   const dispatch = useDispatch();
 
@@ -31,6 +33,7 @@ const EditUser = ({ show, onHide, userData }) => {
       });
       // Set preview URL from existing profile
       setPreviewUrl(userData.profile ? `http://localhost:5000/uploads/${userData.profile}` : null);
+      setError(null);
     }
   }, [userData]);
 
@@ -46,19 +49,62 @@ const EditUser = ({ show, onHide, userData }) => {
     if (file) {
       setFormData({ ...formData, profile: file });
       setPreviewUrl(URL.createObjectURL(file));
+      setError(null);
     }
+  };
+
+  // Validate form
+  const validateForm = () => {
+    // Required fields validation
+    if (!formData.name.trim()) {
+      setError('Name is required');
+      return false;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      return false;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+
+    if (!formData.gender) {
+      setError('Please select a gender');
+      return false;
+    }
+
+    if (!formData.city.trim()) {
+      setError('City is required');
+      return false;
+    }
+
+    // City validation - only letters and spaces
+    const cityRegex = /^[A-Za-z\s]+$/;
+    if (!cityRegex.test(formData.city.trim())) {
+      setError('City name should only contain letters');
+      return false;
+    }
+
+    // Password validation (only if provided)
+    if (formData.password && formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
+
+    return true;
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
-    // Validate form (password is optional for edit)
-    if (!formData.name || !formData.email || !formData.gender || !formData.city) {
-      setError("Name, email, gender, and city are required");
-      setLoading(false);
+    if (!validateForm()) {
       return;
     }
 
@@ -79,11 +125,12 @@ const EditUser = ({ show, onHide, userData }) => {
         data 
       })).unwrap();
       
+      toast.success('User updated successfully');
       onHide();
     } catch (error) {
-      setError(error || "Failed to update user. Please try again.");
-    } finally {
-      setLoading(false);
+      const errorMessage = error?.message || serverError || "Failed to update user";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -280,9 +327,14 @@ const EditUser = ({ show, onHide, userData }) => {
             <button
               type="button"
               className="btn btn-success w-100 fw-bold"
-              style={{ height: "45px" }}
               onClick={handleSubmit}
               disabled={loading}
+              style={{
+                height: "45px",
+                background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
+                border: 'none',
+                boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
+              }}
             >
               {loading ? (
                 <>

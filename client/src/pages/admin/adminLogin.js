@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { loginAdmin } from '../../redux/reducers/admin/adminSlice';
+import toast from 'react-hot-toast';
 
 const AdminLogin = () => {
+  const [clientError, setClientError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading, error, isAuthenticated } = useSelector((state) => state.admin);
@@ -20,9 +22,16 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if(!formData.email.trim() || !formData.password.trim()) {
+      setClientError('*please fill in all fields');
+      return;
+    }
+
     try {
       await dispatch(loginAdmin(formData)).unwrap();
       navigate('/admin/dashboard');
+      toast.success('Login successful!');
     } catch (err) {
       console.error('Login failed:', err);
     }
@@ -33,7 +42,10 @@ const AdminLogin = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    setClientError('');
   };
+
+  const sayError = error || clientError;
 
   return (
     <div className="container min-vh-100 d-flex align-items-center justify-content-center">
@@ -47,13 +59,13 @@ const AdminLogin = () => {
             <p className="text-secondary">Access admin dashboard</p>
           </div>
 
-          {error && (
+          {sayError && (
             <div className="alert alert-danger" role="alert">
-              {error}
+              {sayError}
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form>
             <div className="mb-3">
               <label htmlFor="email" className="form-label text-secondary small">Admin Email</label>
               <div className="input-group">
@@ -68,7 +80,6 @@ const AdminLogin = () => {
                   placeholder="Enter admin email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -87,7 +98,6 @@ const AdminLogin = () => {
                   placeholder="Enter admin password"
                   value={formData.password}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -101,6 +111,7 @@ const AdminLogin = () => {
                 boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)'
               }}
               disabled={loading}
+              onClick={handleSubmit}
             >
               {loading ? (
                  <i className="fas fa-spinner fa-spin me-2"></i>

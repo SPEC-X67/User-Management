@@ -81,7 +81,7 @@ html, body, #root {
 
 .btn {
   padding: 0.5rem 1rem;
-  font-weight: 500;
+  font-weight: 600;
   border-radius: 6px;
   transition: all 0.2s ease;
   font-size: 0.95rem;
@@ -349,4 +349,68 @@ html, body, #root {
 
 .input-group:focus-within .input-group-text {
   border-color: #6c757d;
+}
+
+/* Toast Confirmation Styles */
+.confirm-toast-container {
+  background: #1a1d20;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.confirm-toast-icon {
+  display: flex;
+  justify-content: start;
+  width: 100%;
+  font-size: 20px;
+}
+
+.confirm-toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.confirm-toast-actions {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.toast-cancel-btn {
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.toast-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.toast-delete-btn {
+  padding: 8px 20px;
+  background: linear-gradient(45deg, #ff4d4d, #f02929);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(240, 41, 41, 0.3);
+}
+
+.toast-delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(240, 41, 41, 0.4);
 }

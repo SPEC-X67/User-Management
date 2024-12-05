@@ -1,9 +1,14 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { addUser } from "../../redux/reducers/admin/adminSlice";
+import React, { useState, useEffect} from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addUser, clearError } from "../../redux/reducers/admin/adminSlice";
+import toast from 'react-hot-toast';
 
 const AddUser = ({ show, onHide }) => {
-  // Form state
+  const dispatch = useDispatch();
+  const [clientError, setClientError] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const { loading, error: serverError } = useSelector((state) => state.admin);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -12,95 +17,138 @@ const AddUser = ({ show, onHide }) => {
     city: "",
     profile: null,
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(clearError());
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
-  // Handle input changes
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(null);
-  };
-
-  // Handle file upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setClientError('*file size should be less than 5MB');
+        return;
+      }
+      // Validate file type
+      if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+        setClientError('*only jpg, jpeg, or png files are allowed');
+        return;
+      }
       setFormData({ ...formData, profile: file });
       setPreviewUrl(URL.createObjectURL(file));
-      setError(null);
+      setClientError(null);
     }
   };
 
-  // Handle form submission
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setClientError(null);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      gender: "",
+      city: "",
+      profile: null,
+    });
+    setPreviewUrl(null);
+    setClientError(null);
+    dispatch(clearError());
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    // Validate form
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.gender ||
-      !formData.city
-    ) {
-      setError("All fields are required");
-      setLoading(false);
+    setClientError(null);
+    dispatch(clearError());
+    
+    // Validate required fields
+    if (!formData.name.trim() || !formData.email.trim() || !formData.password.trim() || 
+        !formData.gender.trim() || !formData.city.trim() || !formData.profile) {
+      setClientError('*please fill in all fields');
       return;
     }
 
-    // Create FormData object
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
-    });
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setClientError('*please enter a valid email address');
+      return;
+    }
+
+    // Password validation
+    if (formData.password.length < 6) {
+      setClientError('*password must be at least 6 characters long');
+      return;
+    }
+
+    // City validation - only letters and spaces allowed
+    const cityRegex = /^[A-Za-z\s]+$/;
+    if (!cityRegex.test(formData.city.trim())) {
+      setClientError('*Enter a valid city name');
+      return;
+    }
 
     try {
-      // Dispatch addUser action
-      await dispatch(addUser(data)).unwrap();
-      onHide();
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        gender: "",
-        city: "",
-        profile: null,
+      const data = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (formData[key]) {
+          data.append(key, formData[key]);
+        }
       });
-      setPreviewUrl(null);
+
+      const result = await dispatch(addUser(data)).unwrap();
+      if (result && result.success) {
+        toast.success('User added successfully');
+        resetForm();
+        onHide();
+      } else {
+        throw new Error(result.message || 'Failed to add user');
+      }
     } catch (error) {
-      setError(error.message || "Failed to register user. Please try again.");
-    } finally {
-      setLoading(false);
+      const errorMessage = error?.message || error || 'Failed to add user';
+      if (errorMessage.toLowerCase().includes('email already exists')) {
+        setClientError('*email already exists');
+      } else {
+        setClientError('*' + errorMessage.toLowerCase());
+      }
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleModalClick = (e) => {
+    if (e.target.className.includes("modal fade") && !clientError && !serverError) {
+      onHide();
+    }
+  };
+
+  const handleCloseClick = () => {
+    if (!clientError && !serverError) {
+      onHide();
     }
   };
 
   return (
     <div
       className={`modal fade ${show ? "show" : ""}`}
-      id="addUserModal"
-      tabIndex="-1"
-      role="dialog"
-      aria-labelledby="addUserModalLabel"
       style={{ display: show ? "block" : "none" }}
-      onClick={(e) => {
-        if (e.target.className.includes("modal fade show")) {
-          onHide();
-        }
-      }}
-      aria-hidden={!show}
+      onClick={handleModalClick}
     >
       <div
         className="modal-dialog modal-dialog-scrollable modal-md"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-content bg-dark text-white">
-          {/* Modal Header */}
           <div className="modal-header" style={{ borderStyle: "none" }}>
             <h5 className="modal-title" id="addUserModalLabel">
               Add New User
@@ -108,18 +156,17 @@ const AddUser = ({ show, onHide }) => {
             <button
               type="button"
               className="btn-close btn-close-white"
-              onClick={onHide}
+              onClick={handleCloseClick}
               aria-label="Close"
             ></button>
           </div>
 
-          {/* Modal Body */}
           <div className="modal-body">
             <form onSubmit={handleSubmit}>
               {/* Error Alert */}
-              {error && (
+              {(clientError || serverError) && (
                 <div className="alert alert-danger" role="alert">
-                  {error}
+                  {clientError || '*' + serverError.toLowerCase()}
                 </div>
               )}
 
@@ -178,7 +225,7 @@ const AddUser = ({ show, onHide }) => {
                       placeholder="Enter full name"
                       name="name"
                       value={formData.name}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -198,7 +245,7 @@ const AddUser = ({ show, onHide }) => {
                       placeholder="Enter email address"
                       name="email"
                       value={formData.email}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -218,7 +265,7 @@ const AddUser = ({ show, onHide }) => {
                       placeholder="Enter city"
                       name="city"
                       value={formData.city}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -236,7 +283,7 @@ const AddUser = ({ show, onHide }) => {
                       className="form-select bg-dark text-white border-secondary rounded-0 rounded-end"
                       name="gender"
                       value={formData.gender}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     >
                       <option value="">Select gender</option>
                       <option value="male">Male</option>
@@ -261,7 +308,7 @@ const AddUser = ({ show, onHide }) => {
                       placeholder="Create password"
                       name="password"
                       value={formData.password}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -274,7 +321,12 @@ const AddUser = ({ show, onHide }) => {
             <button
               type="button"
               className="btn btn-success w-100 fw-bold"
-              style={{ height: "45px" }}
+              style={{
+                height: "45px",
+                background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
+                border: 'none',
+                boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
+              }}
               onClick={handleSubmit}
               disabled={loading}
             >

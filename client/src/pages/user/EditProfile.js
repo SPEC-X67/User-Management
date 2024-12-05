@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { updateUserProfile } from "../../redux/reducers/user/userSlice";
+import toast from 'react-hot-toast';
 
 const EditProfile = ({ show, onHide, userData }) => {
   // Form state
@@ -32,7 +33,6 @@ const EditProfile = ({ show, onHide, userData }) => {
       setPreviewUrl(userData.profile ? `http://localhost:5000/uploads/${userData.profile}` : null);
     }
   }, [userData]);
-  
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -56,8 +56,22 @@ const EditProfile = ({ show, onHide, userData }) => {
     setError(null);
 
     // Validate form (password is optional for edit)
-    if (!formData.name || !formData.email || !formData.gender || !formData.city) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.gender.trim() || !formData.city.trim()) {
       setError("Name, email, gender, and city are required");
+      setLoading(false);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('*please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    // Validate password if it's being changed
+    if (formData.password && formData.password.length < 6) {
+      setError('*password must be at least 6 characters long');
       setLoading(false);
       return;
     }
@@ -65,7 +79,7 @@ const EditProfile = ({ show, onHide, userData }) => {
     try {
       // Create FormData object
       const data = new FormData();
-      
+
       // Only append fields that are not empty
       Object.keys(formData).forEach((key) => {
         if (key === 'password' && !formData[key]) return; // Skip empty password
@@ -74,14 +88,18 @@ const EditProfile = ({ show, onHide, userData }) => {
       });
 
       // Dispatch updateUser action with user ID
-      await dispatch(updateUserProfile({ 
-        id: userData._id, 
-        data 
+      const result = await dispatch(updateUserProfile({
+        id: userData._id,
+        data
       })).unwrap();
-      
+
+      toast.success('Profile updated successfully');
       onHide();
-    } catch (error) {
-      setError(error || "Failed to update user. Please try again.");
+    } catch (err) {
+      // Get error message from rejected action
+      const errorMessage = err.message || err || "Failed to update user";
+      setError('*' + errorMessage.toLowerCase());
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -134,7 +152,7 @@ const EditProfile = ({ show, onHide, userData }) => {
               <div className="text-center mb-4">
                 <div className="position-relative d-inline-block">
                   <img
-                    src={ previewUrl || `http://localhost:5000/uploads/${userData?.profile}` || "https://via.placeholder.com/150"}
+                    src={previewUrl || `http://localhost:5000/uploads/${userData?.profile}` || "https://via.placeholder.com/150"}
                     alt="Profile Preview"
                     className="rounded-circle"
                     style={{
@@ -264,7 +282,7 @@ const EditProfile = ({ show, onHide, userData }) => {
                     <input
                       type="password"
                       className="form-control bg-dark text-white border-secondary rounded-0 rounded-end"
-                      placeholder="Enter new password (optional)"
+                      placeholder="Create new password (optional)"
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
@@ -280,7 +298,12 @@ const EditProfile = ({ show, onHide, userData }) => {
             <button
               type="button"
               className="btn btn-success w-100 fw-bold"
-              style={{ height: "45px" }}
+              style={{
+                height: "45px",
+                background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
+                border: 'none',
+                boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
+              }}
               onClick={handleSubmit}
               disabled={loading}
             >

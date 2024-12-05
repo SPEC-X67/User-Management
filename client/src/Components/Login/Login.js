@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, clearError } from '../../redux/reducers/user/userSlice';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading, error, isAuthenticated } = useSelector((state) => state.user);
+  const [clientError, setClientError] = useState('');
 
   const [formData, setFormData] = useState({
     email: '',
@@ -22,13 +24,34 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      toast.success('Login successful!');
       navigate('/home');
     }
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser(formData));
+    setClientError('');
+    
+    // Form validation
+    if (!formData.email.trim() || !formData.password.trim()) {
+      setClientError('*please fill in all fields');
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setClientError('*please enter a valid email address');
+      return;
+    }
+
+    try {
+      await dispatch(loginUser(formData)).unwrap();
+    } catch (err) {
+      const errorMessage = err.message || err || "Login failed";
+      setClientError('*' + errorMessage.toLowerCase());
+    }
   };
 
   const handleChange = (e) => {
@@ -36,6 +59,8 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear errors when user starts typing
+    setClientError('');
   };
 
   const handleNavigateToRegister = () => {
@@ -52,9 +77,9 @@ const Login = () => {
             <p className="text-secondary">Please sign in to continue</p>
           </div>
 
-          {error && (
+          {(clientError || error) && (
             <div className="alert alert-danger" role="alert">
-              {error}
+              {clientError || error}
             </div>
           )}
 

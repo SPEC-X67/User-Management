@@ -15,9 +15,6 @@ class userController {
     static createNewUser = async(req, res) => {
         const { name, email, password, gender, city } = req.body;
         try {
-            if (!name || !email || !password || !gender || !city) {
-                return res.status(400).json({ message: "All fields are required" });
-            }
 
             const isEmail = await userModel.findOne({ email });
             if (isEmail) {
@@ -58,9 +55,6 @@ class userController {
     static adminLogin = async(req, res) => {
         const { email, password } = req.body;
         try {
-            if (!email || !password) {
-                return res.status(400).json({ message: "All fields are required" });
-            }
 
             const user = await userModel.findOne({ email });
             if (!user) {
@@ -99,11 +93,10 @@ class userController {
     static EditUser = async(req, res) => {
         try {
             const {id} = req.params;
-            
-            // Check if user exists
-            const user = await userModel.findById(id);
-            if (!user) {
-                return res.status(404).json({ message: "User not found" });
+
+            const isEmail = await userModel.findOne({ email: req.body.email, $ne : id });
+            if (isEmail) {
+                return res.status(400).json({ message: "Email already exists" });
             }
 
             let userData = {

@@ -39,7 +39,10 @@ export const updateUserProfile = createAsyncThunk('user/updateUserProfile', asyn
     const response = await api.put(`/users/profile/${id}`, data);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Failed to update user');
+    if (error.response && error.response.data) {
+      return rejectWithValue(error.response.data);
+    }
+    return rejectWithValue({ message: 'Failed to update user' });
   }
 });
 
@@ -56,7 +59,6 @@ const userSlice = createSlice({
     logout: (state) => {
       state.currentUser = null;
       state.users = [];
-      state.loading = false;
       state.error = null;
       state.isAuthenticated = false;
       localStorage.removeItem('token');
@@ -101,12 +103,12 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentUser = action.payload;
         state.error = null;
+        state.currentUser = action.payload;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload?.message || action.error.message;
       });
   }
 });

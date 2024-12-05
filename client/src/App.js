@@ -7,6 +7,7 @@ import Login from './pages/user/Login.js';
 import Register from './pages/user/Register.js';
 import AdminLogin from './pages/admin/adminLogin.js';
 import About from './Components/About/About.js';
+import { Toaster } from 'react-hot-toast';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css'
@@ -15,6 +16,12 @@ function App() {
   return (
     <>
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000
+        }}
+      />
       <ToastContainer
         position="top-right"
         autoClose={3000}

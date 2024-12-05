@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllUsers, deleteUser } from '../../redux/reducers/admin/adminSlice';
 import AddUser from '../../pages/admin/Adduser';
 import EditUser from '../../pages/admin/Edituser';
+import toast from 'react-hot-toast'; // Import toast
 
 const Dashboard = () => {
 
@@ -31,19 +32,52 @@ const Dashboard = () => {
   );
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        const result = await dispatch(deleteUser(userId)).unwrap();
-        if (result && result.message) {
-          alert(result.message); // Show success message
-        }
-      } catch (error) {
-        // Show specific error message from backend or fallback message
-        const errorMessage = error?.message || error || 'Failed to delete user';
-        alert(errorMessage);
-        console.error('Delete user error:', errorMessage);
-      }
-    }
+    toast((t) => (
+      <div className="confirm-toast-container">
+        <div className="confirm-toast-content">
+          <div className="confirm-toast-icon">
+            <i className="fas fa-exclamation-triangle text-warning"></i>
+          </div>
+          <div className="confirm-toast-message">
+            <h6 className="mb-1 text-white">Confirm Deletion</h6>
+            <p className="mb-0 text-light">Are you sure you want to delete this user?</p>
+          </div>
+          <div className="confirm-toast-actions">
+            <button 
+              className="toast-cancel-btn"
+              onClick={() => toast.dismiss(t.id)}
+            >
+              Cancel
+            </button>
+            <button 
+              className="toast-delete-btn"
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  const result = await dispatch(deleteUser(userId)).unwrap();
+                  if (result && result.message) {
+                    toast.success(result.message);
+                  }
+                } catch (error) {
+                  const errorMessage = error?.message || error || 'Failed to delete user';
+                  toast.error(errorMessage);
+                }
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    ), {
+      duration: 6000,
+      position: 'top-center',
+      style: {
+        background: 'transparent',
+        padding: 0,
+        boxShadow: 'none'
+      },
+    });
   };
 
   const getProfileImageUrl = (profileImage) => {
@@ -67,10 +101,18 @@ const Dashboard = () => {
       <div className="card bg-dark border-0">
         <div className="card-header bg-dark border-0 d-flex justify-content-between align-items-center py-4">
           <div>
-            <h2 className="h4 mb-1 text-white">User Management</h2>
-            <p className="text-secondary small mb-0">Manage users in seconds</p>
+            <h2 className="h4 mb-1 text-white">User Control Panel</h2>
+            <p className="text-secondary small mb-0">Handle Accounts with Ease.</p>
           </div>
-          <button className="btn btn-success d-flex align-items-center gap-2" onClick={() => setShowAddModal(true)}>
+          <button 
+          className="btn btn-success d-flex align-items-center gap-2" 
+          onClick={() => setShowAddModal(true)}
+          style={{
+            background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
+            border: 'none',
+            boxShadow: '0 1px 15px rgba(46, 204, 113, 0.1)',
+          }}
+          >
             <i className="fas fa-plus"></i>
             New User
           </button>

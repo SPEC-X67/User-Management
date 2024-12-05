@@ -56,10 +56,19 @@ export const addUser = createAsyncThunk(
     'admin/addUser',
     async (userData, { rejectWithValue }) => {
         try {
-            const response = await api.post('/admin/users', userData);
-            return response.data.user;
+            const response = await api.post('/admin/users', userData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            if (response.data.success) {
+                return response.data;
+            } else {
+                return rejectWithValue(response.data.message);
+            }
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to add user');
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to add user';
+            return rejectWithValue(errorMessage);
         }
     }
 );
@@ -113,6 +122,9 @@ const adminSlice = createSlice({
             state.error = null;
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminName');
+        },
+        clearError: (state) => {
+            state.error = null;
         }
     },
     extraReducers: (builder) => {
@@ -151,7 +163,10 @@ const adminSlice = createSlice({
             })
             .addCase(addUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.users.push(action.payload);
+                state.error = null;
+                if (action.payload.user) {
+                    state.users = [...state.users, action.payload.user];
+                }
             })
             .addCase(addUser.rejected, (state, action) => {
                 state.loading = false;
@@ -187,5 +202,5 @@ const adminSlice = createSlice({
     }
 });
 
-export const { logout } = adminSlice.actions;
+export const { logout, clearError } = adminSlice.actions;
 export default adminSlice.reducer;

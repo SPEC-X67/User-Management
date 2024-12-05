@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '../../redux/reducers/user/userSlice';
 import { logout as adminLogout } from '../../redux/reducers/admin/adminSlice';
+import toast from 'react-hot-toast';
 
 const Header = ({ isAdmin }) => {
   const dispatch = useDispatch();
@@ -12,9 +13,11 @@ const Header = ({ isAdmin }) => {
     if (isAdmin) {
       dispatch(adminLogout());
       navigate('/admin');
+      toast.success('See you soon!');
     } else {
       dispatch(logout());
       navigate('/');
+      toast.success('See you soon!');
     }
   };
 
