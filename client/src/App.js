@@ -7,13 +7,26 @@ import Login from './pages/user/Login.js';
 import Register from './pages/user/Register.js';
 import AdminLogin from './pages/admin/adminLogin.js';
 import About from './Components/About/About.js';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './index.css'
 
 function App() {
   return (
     <>
     <BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <Routes>
         <Route path='/admin/dashboard' element={<Dashbord/>}/>
         <Route path='/admin' element={<AdminLogin/>}/>

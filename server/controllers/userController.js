@@ -6,10 +6,6 @@ class userController {
   static userRegistration = async (req, res) => {
     const { name, email, password, gender, city } = req.body;
     try {
-      if (!name || !email || !password || !gender || !city) {
-        return res.status(400).json({ message: "All fields are required" });
-      }
-
       const isEmail = await userModel.findOne({ email });
       if (isEmail) {
         return res.status(400).json({ message: "Email already exists" });

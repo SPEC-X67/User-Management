@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../../redux/reducers/user/userSlice';
+import { toast } from 'react-toastify';
 
 const Register = () => {
-
-  const {loading, error, isAuthenticated} = useSelector(state => state.user);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,11 +13,20 @@ const Register = () => {
     gender: '',
     profile: null
   });
+  const [clientError, setClientError] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+  const {loading, error: serverError, isAuthenticated} = useSelector(state => state.user);
+
+  useEffect(() => {
+    if (serverError) {
+      toast.error(serverError.toLowerCase());
+    }
+  }, [serverError]);
+
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/home');
@@ -26,22 +34,77 @@ const Register = () => {
   }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setClientError('');
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (!file.type.startsWith('image/')) {
+        setClientError('*please select an image file');
+        return;
+      }
       setFormData({ ...formData, profile: file });
       setPreviewUrl(URL.createObjectURL(file));
+      setClientError('');
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const validateStep = (step) => {
+    switch (step) {
+      case 1:
+        if (!formData.name.trim() || !formData.password.trim()) {
+          setClientError('*name and password are required');
+          return false;
+        }
+        if (formData.password.length < 6) {
+          setClientError('*password must be at least 6 characters');
+          return false;
+        }
+        break;
+      case 2:
+        if (!formData.email.trim() || !formData.city.trim() || !formData.gender.trim()) {
+          setClientError('*email, city and gender are required');
+          return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          setClientError('*please enter a valid email address');
+          return false;
+        }
+        break;
+      case 3:
+        if (!formData.profile) {
+          setClientError('*please select a profile picture');
+          return false;
+        }
+        break;
+      default:
+        return true;
+    }
+    return true;
+  };
+
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setClientError('');
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  const prevStep = () => {
+    setClientError('');
+    setCurrentStep(prev => prev - 1);
+  };
+
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (!validateStep(currentStep)) return;
 
     const data = new FormData();
     Object.keys(formData).forEach(key => {
@@ -49,183 +112,239 @@ const Register = () => {
     });
 
     try {
-      await dispatch(registerUser(data)).unwrap();
-      navigate('/');
-    } catch (error) {
-      console.error("Failed to register", error)
+      dispatch(registerUser(data)).unwrap()
+        .then(() => {
+          navigate('/');
+          toast.success('Registration successful!');
+        })
+        .catch(err => {
+          setClientError('*' + err.toLowerCase());
+        });
+    } catch (err) {
+      setClientError('*' + err.toLowerCase());
     }
   };
 
-  return (
-    <div className="container min-vh-100 d-flex align-items-center justify-content-center py-5">
-      <div className="card bg-dark text-white" style={{ maxWidth: '450px', width: '100%' }}>
-        <div className="card-body p-4">
-          <div className="text-center mb-4">
-            <h2 className="fw-bold mb-2">Register New User</h2>
-            <p className="text-secondary">Create a new user profile</p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <div className="text-center mb-4">
-              <div className="position-relative d-inline-block">
-                <img
-                  src={previewUrl || 'https://via.placeholder.com/150'}
-                  alt="Profile Preview"
-                  className="rounded-circle"
-                  style={{
-                    width: '150px',
-                    height: '150px',
-                    objectFit: 'cover',
-                    border: '3px solid #2a2d2e'
-                  }}
-                />
-                <label
-                  className="btn btn-success btn-sm position-absolute bottom-0 end-0 rounded-circle"
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    padding: '0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '8px'
-                  }}
-                >
-                  <i className="fas fa-camera"></i>
-                  <input
-                    type="file"
-                    className="d-none"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    name="profile"
-                  />
-                </label>
-              </div>
-            </div>
-
-            {/* Full Name */}
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <>
             <div className="mb-3">
-              <label className="form-label text-secondary small">Full Name</label>
+              <label className="form-label">Full Name</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-user text-secondary"></i>
                 </span>
                 <input
                   type="text"
-                  className="form-control bg-dark border-secondary rounded-0 rounded-end text-white"
                   name="name"
+                  className="form-control bg-dark text-white border-secondary rounded-0 rounded-end"
+                  placeholder="Enter your name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter full name"
-                  required
                 />
               </div>
             </div>
-
-            {/* Email */}
             <div className="mb-3">
-              <label className="form-label text-secondary small">Email Address</label>
-              <div className="input-group">
-                <span className="input-group-text bg-dark border-secondary">
-                  <i className="fas fa-envelope text-secondary"></i>
-                </span>
-                <input
-                  type="email"
-                  className="form-control bg-dark border-secondary rounded-0 rounded-end text-white"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter email address"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div className="mb-3">
-              <label className="form-label text-secondary small">Password</label>
+              <label className="form-label">Password</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-lock text-secondary"></i>
                 </span>
                 <input
                   type="password"
-                  className="form-control bg-dark border-secondary rounded-0 rounded-end text-white"
                   name="password"
+                  className="form-control bg-dark text-white border-secondary rounded-0 rounded-end"
+                  placeholder="Create a password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter password"
-                  required
                 />
               </div>
             </div>
-
-            {/* City */}
+          </>
+        );
+      case 2:
+        return (
+          <>
             <div className="mb-3">
-              <label className="form-label text-secondary small">City</label>
+              <label className="form-label">Email Address</label>
+              <div className="input-group">
+                <span className="input-group-text bg-dark border-secondary">
+                  <i className="fas fa-envelope text-secondary"></i>
+                </span>
+                <input
+                  type="email"
+                  name="email"
+                  className="form-control bg-dark text-white border-secondary rounded-0 rounded-end"
+                  placeholder="Enter email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">City</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-map-marker-alt text-secondary"></i>
                 </span>
                 <input
                   type="text"
-                  className="form-control bg-dark border-secondary rounded-0 rounded-end text-white"
                   name="city"
+                  className="form-control bg-dark text-white border-secondary rounded-0 rounded-end"
+                  placeholder="Enter city"
                   value={formData.city}
                   onChange={handleChange}
-                  placeholder="Enter city"
-                  required
                 />
               </div>
             </div>
-
-            {/* Gender */}
-            <div className="mb-4">
-              <label className="form-label text-secondary small">Gender</label>
+            <div className="mb-3">
+              <label className="form-label">Gender</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-venus-mars text-secondary"></i>
                 </span>
                 <select
-                  className="form-select bg-dark border-secondary rounded-0 rounded-end text-white"
                   name="gender"
+                  className="form-select bg-dark text-white border-secondary rounded-0 rounded-end"
                   value={formData.gender}
                   onChange={handleChange}
-                  required
                 >
                   <option value="">Select gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
             </div>
-
-            <button
-              type="submit"
-              className="btn btn-success w-100 py-2 mb-3"
-              style={{
-                background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
-                border: 'none',
-                boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)'
-              }}
-            > {loading ? ("Registering...") : (
-              <>              
-                <i className="fas fa-user-plus me-2"></i>
-                Create Account
-              </>
-            ) }
-            </button>
-
-            <div className="text-center">
-              <p className="text-secondary mb-0">
-                Already have an account?{' '}
-                <Link to="/" className="text-success text-decoration-none">
-                  Login here
-                </Link>
-              </p>
+          </>
+        );
+      case 3:
+        return (
+          <div className="text-center mb-4">
+            <div className="position-relative d-inline-block">
+              <img
+                src={previewUrl || "https://via.placeholder.com/150"}
+                alt="Profile"
+                className="rounded-circle"
+                style={{ width: '150px', height: '150px', objectFit: 'cover' }}
+              />
+              <label
+                htmlFor="profile"
+                className="position-absolute bottom-0 end-0 bg-success rounded-circle"
+                style={{ cursor: 'pointer', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <i className="fas fa-camera text-white"></i>
+              </label>
             </div>
+            <input
+              type="file"
+              id="profile"
+              name="profile"
+              className="d-none"
+              onChange={handleFileChange}
+              accept="image/*"
+            />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="container d-flex align-items-center justify-content-center" style={{ height: '100vh', padding: '20px 0' }}>
+      <div className="card bg-dark text-white" style={{ maxWidth: '450px', width: '100%', maxHeight: '600px', position: 'relative' }}>
+        {/* Fixed Header */}
+        <div className="card-header bg-dark border-0 text-center" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+          <div className="mb-3">
+            <i className="fas fa-user-circle fa-3x text-success mb-2"></i>
+          </div>
+          <h2 className="fw-bold mb-2">Register New User</h2>
+          <p className="text-secondary">Step {currentStep} of 3</p>
+          
+          {/* Progress Bar */}
+          <div className="progress bg-dark mb-4" style={{ height: '4px' }}>
+            <div
+              className="progress-bar bg-success"
+              style={{
+                width: `${(currentStep / 3) * 100}%`,
+                transition: 'width 0.3s ease-in-out'
+              }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="card-body p-4" style={{ 
+          overflowY: 'auto', 
+          height: 'calc(100% - 160px)', 
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': { display: 'none' }
+        }}>
+          {clientError && (
+            <div className="alert alert-danger" role="alert">
+              {clientError}
+            </div>
+          )}
+
+          <form id="registerForm" onSubmit={(e) => e.preventDefault()}>
+            {renderStep()}
           </form>
+        </div>
+
+        {/* Fixed Footer with Navigation Buttons */}
+        <div className="card-footer bg-dark border-0 text-center p-3" style={{ position: 'sticky', bottom: 0, zIndex: 1 }}>
+          <div className="d-flex gap-2 justify-content-between">
+            {currentStep > 1 && (
+              <button
+                type="button"
+                className="btn btn-outline-light px-4"
+                onClick={prevStep}
+                disabled={loading}
+              >
+                Back
+              </button>
+            )}
+            {currentStep < 3 ? (
+              <button
+                type="button"
+                className="btn btn-success px-4"
+                onClick={nextStep}
+                disabled={loading}
+                style={{
+                  background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
+                  border: 'none',
+                  boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
+                  marginLeft: currentStep === 1 ? 'auto' : '0'
+                }}
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-success px-4"
+                onClick={handleSubmit}
+                disabled={loading}
+                style={{
+                  background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
+                  border: 'none',
+                  boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
+                  marginLeft: 'auto'
+                }}
+              >
+                {loading ? "Registering..." : (
+                  <>
+                    <i className="fas fa-user-plus me-2"></i>
+                    Create Account
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
