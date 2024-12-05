@@ -92,11 +92,16 @@ class userController {
 
     static EditUser = async(req, res) => {
         try {
-            const {id} = req.params;
+            const { id } = req.params;
 
-            const isEmail = await userModel.findOne({ email: req.body.email, $ne : id });
-            if (isEmail) {
-                return res.status(400).json({ message: "Email already exists" });
+            // Check for existing email but exclude current user
+            const existingUser = await userModel.findOne({ 
+                email: req.body.email, 
+                _id: { $ne: id } 
+            });
+            
+            if (existingUser) {
+                return res.status(400).json({ message: "Email already exists." });
             }
 
             let userData = {
@@ -122,14 +127,25 @@ class userController {
             const updatedUser = await userModel.findByIdAndUpdate(
                 id, 
                 userData,
-                { new: true } // Return updated document
+                { new: true, runValidators: true } // Return updated document and run validators
             );
 
-            return res.status(200).json(updatedUser);
+            if (!updatedUser) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "User updated successfully",
+                user: updatedUser
+            });
 
         } catch (error) {
             console.error("Error updating user:", error);
-            return res.status(500).json({ message: "Error updating user", error: error.message });
+            if (error.code === 11000) {
+                return res.status(400).json({ message: "Email already exists" });
+            }
+            return res.status(500).json({ message: error.message || "Error updating user" });
         }
     }
 

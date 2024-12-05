@@ -152,7 +152,7 @@ const EditProfile = ({ show, onHide, userData }) => {
               <div className="text-center mb-4">
                 <div className="position-relative d-inline-block">
                   <img
-                    src={previewUrl || `http://localhost:5000/uploads/${userData?.profile}` || "https://via.placeholder.com/150"}
+                    src={previewUrl || `http://localhost:5000/uploads/${userData?.profile}` || "https://avatar.iran.liara.run/public/48"}
                     alt="Profile Preview"
                     className="rounded-circle"
                     style={{

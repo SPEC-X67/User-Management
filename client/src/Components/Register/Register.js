@@ -238,7 +238,7 @@ const Register = () => {
           <div className="text-center mb-4">
             <div className="position-relative d-inline-block">
               <img
-                src={previewUrl || "https://via.placeholder.com/150"}
+                src={previewUrl || "https://avatar.iran.liara.run/public/48"}
                 alt="Profile"
                 className="rounded-circle"
                 style={{ width: '150px', height: '150px', objectFit: 'cover' }}

@@ -46,7 +46,7 @@ const Home = () => {
   const getProfileImageUrl = (profileImage) =>
     profileImage
       ? `http://localhost:5000/uploads/${profileImage}`
-      : 'https://via.placeholder.com/150';
+      : 'https://avatar.iran.liara.run/public/48';
 
   if (loading) {
     return (

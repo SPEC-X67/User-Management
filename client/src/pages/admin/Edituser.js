@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../../redux/reducers/admin/adminSlice";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 const EditUser = ({ show, onHide, userData }) => {
   // Form state
@@ -14,123 +14,96 @@ const EditUser = ({ show, onHide, userData }) => {
     profile: null,
   });
 
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
-  const { loading, error: serverError } = useSelector((state) => state.admin);
+  const { loading } = useSelector((state) => state.admin);
 
   const dispatch = useDispatch();
 
-  // Populate form when userData changes
   useEffect(() => {
     if (userData) {
       setFormData({
         name: userData.name || "",
         email: userData.email || "",
-        password: "", // Empty by default for edit
+        password: "",
         gender: userData.gender || "",
         city: userData.city || "",
         profile: null,
       });
-      // Set preview URL from existing profile
-      setPreviewUrl(userData.profile ? `http://localhost:5000/uploads/${userData.profile}` : null);
-      setError(null);
+      setPreviewUrl(
+        userData.profile
+          ? `http://localhost:5000/uploads/${userData.profile}`
+          : "https://avatar.iran.liara.run/public/48"
+      );
+      setError("");
     }
   }, [userData]);
 
-  // Handle input changes
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(null);
+    setError("");
   };
 
-  // Handle file upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFormData({ ...formData, profile: file });
       setPreviewUrl(URL.createObjectURL(file));
-      setError(null);
+      setError("");
     }
   };
 
-  // Validate form
-  const validateForm = () => {
-    // Required fields validation
-    if (!formData.name.trim()) {
-      setError('Name is required');
-      return false;
-    }
-
-    if (!formData.email.trim()) {
-      setError('Email is required');
-      return false;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
-      return false;
-    }
-
-    if (!formData.gender) {
-      setError('Please select a gender');
-      return false;
-    }
-
-    if (!formData.city.trim()) {
-      setError('City is required');
-      return false;
-    }
-
-    // City validation - only letters and spaces
-    const cityRegex = /^[A-Za-z\s]+$/;
-    if (!cityRegex.test(formData.city.trim())) {
-      setError('City name should only contain letters');
-      return false;
-    }
-
-    // Password validation (only if provided)
-    if (formData.password && formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return false;
-    }
-
-    return true;
-  };
-
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setError("");
 
-    if (!validateForm()) {
+    // Validate form
+    if (!formData.name.trim()) {
+      setError("Name is required");
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError("Email is required");
+      return;
+    }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError("Invalid email format");
+      return;
+    }
+    if (formData.password && formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    if (!formData.city.trim()) {
+      setError("City is required");
+      return;
+    }
+    if (!/^[A-Za-z\s]+$/.test(formData.city.trim())) {
+      setError("Enter a valid city name");
+      return;
+    }
+    if (!formData.gender) {
+      setError("Gender is required");
       return;
     }
 
-    try {
-      // Create FormData object
-      const data = new FormData();
-      
-      // Only append fields that are not empty
-      Object.keys(formData).forEach((key) => {
-        if (key === 'password' && !formData[key]) return; // Skip empty password
-        if (key === 'profile' && !formData[key]) return; // Skip if no new profile image
-        data.append(key, formData[key]);
-      });
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", formData.name);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("city", formData.city);
+    formDataToSend.append("gender", formData.gender);
+    if (formData.password) formDataToSend.append("password", formData.password);
+    if (formData.profile) formDataToSend.append("profile", formData.profile);
 
-      // Dispatch updateUser action with user ID
-      await dispatch(updateUser({ 
-        id: userData._id, 
-        data 
-      })).unwrap();
-      
-      toast.success('User updated successfully');
+    try {
+      const result = await dispatch(
+        updateUser({ id: userData._id, data: formDataToSend })
+      ).unwrap();
+      toast.success(result.message || "User updated successfully");
       onHide();
     } catch (error) {
-      const errorMessage = error?.message || serverError || "Failed to update user";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(error || "Failed to update user");
+      setError(error || "Failed to update user");
     }
   };
 
@@ -181,12 +154,16 @@ const EditUser = ({ show, onHide, userData }) => {
               <div className="text-center mb-4">
                 <div className="position-relative d-inline-block">
                   <img
-                    src={ previewUrl || `http://localhost:5000/uploads/${userData?.profile}` || "https://via.placeholder.com/150"}
+                    src={
+                      previewUrl ||
+                      `http://localhost:5000/uploads/${userData?.profile}` ||
+                      "https://avatar.iran.liara.run/public/48"
+                    }
                     alt="Profile Preview"
                     className="rounded-circle"
                     style={{
-                      width: "130px",
-                      height: "130px",
+                      width: "150px",
+                      height: "150px",
                       objectFit: "cover",
                       border: "3px solid #2a2d2e",
                     }}
@@ -331,9 +308,9 @@ const EditUser = ({ show, onHide, userData }) => {
               disabled={loading}
               style={{
                 height: "45px",
-                background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
-                border: 'none',
-                boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
+                background: "linear-gradient(45deg, #4cd964, #2ecc71)",
+                border: "none",
+                boxShadow: "0 4px 15px rgba(46, 204, 113, 0.2)",
               }}
             >
               {loading ? (

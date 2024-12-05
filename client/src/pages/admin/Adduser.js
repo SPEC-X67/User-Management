@@ -28,16 +28,6 @@ const AddUser = ({ show, onHide }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        setClientError('*file size should be less than 5MB');
-        return;
-      }
-      // Validate file type
-      if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-        setClientError('*only jpg, jpeg, or png files are allowed');
-        return;
-      }
       setFormData({ ...formData, profile: file });
       setPreviewUrl(URL.createObjectURL(file));
       setClientError(null);
@@ -174,7 +164,7 @@ const AddUser = ({ show, onHide }) => {
               <div className="text-center mb-4">
                 <div className="position-relative d-inline-block">
                   <img
-                    src={previewUrl || "https://via.placeholder.com/150"}
+                    src={previewUrl || "https://avatar.iran.liara.run/public/48"}
                     alt="Profile Preview"
                     className="rounded-circle"
                     style={{
