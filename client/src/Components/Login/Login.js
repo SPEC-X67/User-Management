@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../../redux/reducers/user/userSlice';
+import { loginUser, clearError } from '../../redux/reducers/user/userSlice';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,6 +12,13 @@ const Login = () => {
     email: '',
     password: ''
   });
+
+  useEffect(() => {
+    dispatch(clearError());
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -29,6 +36,11 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleNavigateToRegister = () => {
+    dispatch(clearError());
+    navigate('/register');
   };
 
   return (
@@ -87,6 +99,11 @@ const Login = () => {
               type="submit" 
               className="btn btn-success w-100 py-2 mb-3"
               disabled={loading}
+              style={{
+                background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
+                border: 'none',
+                boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
+              }}
             >
               {loading ? (
                 <i className="fas fa-spinner fa-spin me-2"></i>
@@ -99,7 +116,7 @@ const Login = () => {
             <div className="text-center">
               <p className="text-secondary mb-0">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-success text-decoration-none">
+                <Link to="/register" className="text-success text-decoration-none" onClick={handleNavigateToRegister}>
                   Register here
                 </Link>
               </p>

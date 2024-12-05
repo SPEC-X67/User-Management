@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../../redux/reducers/user/userSlice';
+import { registerUser, clearError } from '../../redux/reducers/user/userSlice';
 import { toast } from 'react-toastify';
 
 const Register = () => {
@@ -21,9 +21,17 @@ const Register = () => {
   const navigate = useNavigate();
   const {loading, error: serverError, isAuthenticated} = useSelector(state => state.user);
 
+  // Clear error when component mounts and unmounts
+  useEffect(() => {
+    dispatch(clearError());
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
+
   useEffect(() => {
     if (serverError) {
-      toast.error(serverError.toLowerCase());
+      toast.error('*' + serverError.toLowerCase());
     }
   }, [serverError]);
 
@@ -32,6 +40,12 @@ const Register = () => {
       navigate('/home');
     }
   }, [isAuthenticated, navigate]);
+
+  const handleNavigateToLogin = () => {
+    dispatch(clearError());
+    setClientError('');
+    navigate('/');
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,8 +130,7 @@ const Register = () => {
         .then(() => {
           navigate('/');
           toast.success('Registration successful!');
-        })
-        .catch(err => {
+        }).catch(err => {
           setClientError('*' + err.toLowerCase());
         });
     } catch (err) {
@@ -131,7 +144,7 @@ const Register = () => {
         return (
           <>
             <div className="mb-3">
-              <label className="form-label">Full Name</label>
+              <label className="form-label text-secondary small">Full Name</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-user text-secondary"></i>
@@ -147,7 +160,7 @@ const Register = () => {
               </div>
             </div>
             <div className="mb-3">
-              <label className="form-label">Password</label>
+              <label className="form-label text-secondary small">Password</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-lock text-secondary"></i>
@@ -168,7 +181,7 @@ const Register = () => {
         return (
           <>
             <div className="mb-3">
-              <label className="form-label">Email Address</label>
+              <label className="form-label text-secondary small">Email Address</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-envelope text-secondary"></i>
@@ -184,7 +197,7 @@ const Register = () => {
               </div>
             </div>
             <div className="mb-3">
-              <label className="form-label">City</label>
+              <label className="form-label text-secondary small">City</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-map-marker-alt text-secondary"></i>
@@ -200,7 +213,7 @@ const Register = () => {
               </div>
             </div>
             <div className="mb-3">
-              <label className="form-label">Gender</label>
+              <label className="form-label text-secondary small">Gender</label>
               <div className="input-group">
                 <span className="input-group-text bg-dark border-secondary">
                   <i className="fas fa-venus-mars text-secondary"></i>
@@ -254,25 +267,54 @@ const Register = () => {
   };
 
   return (
-    <div className="container d-flex align-items-center justify-content-center" style={{ height: '100vh', padding: '20px 0' }}>
-      <div className="card bg-dark text-white" style={{ maxWidth: '450px', width: '100%', maxHeight: '600px', position: 'relative' }}>
+    <div className="container min-vh-100 d-flex align-items-center justify-content-center" style={{ height: '100vh', padding: '20px 0' }}>
+      <div className="card bg-dark text-white" style={{ maxWidth: '400px', width: '100%', maxHeight: '600px', position: 'relative' }}>
         {/* Fixed Header */}
-        <div className="card-header bg-dark border-0 text-center" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-          <div className="mb-3">
-            <i className="fas fa-user-circle fa-3x text-success mb-2"></i>
-          </div>
-          <h2 className="fw-bold mb-2">Register New User</h2>
-          <p className="text-secondary">Step {currentStep} of 3</p>
-          
-          {/* Progress Bar */}
-          <div className="progress bg-dark mb-4" style={{ height: '4px' }}>
-            <div
-              className="progress-bar bg-success"
-              style={{
-                width: `${(currentStep / 3) * 100}%`,
-                transition: 'width 0.3s ease-in-out'
-              }}
-            ></div>
+        <div className="card-header bg-dark border-0 pt-4 pb-0" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+          {currentStep > 1 && (
+            <button
+              type="button"
+              className="btn btn-link text-secondary position-absolute start-0 top-50 translate-middle-y border-0 p-0 ms-3"
+              onClick={prevStep}
+              style={{ textDecoration: 'none' }}
+            >
+              <i className="fas fa-arrow-left fa-lg"></i>
+            </button>
+          )}
+
+          <div className="text-center">
+            <h2 className="fw-bold mb-2">Create Account</h2>
+            <p className="text-secondary small mb-2">Step {currentStep} of 3</p>
+            <div className="d-flex justify-content-center align-items-center gap-2 mb-2">
+              <div 
+                className="rounded-circle" 
+                style={{ 
+                  width: '14px', 
+                  height: '14px', 
+                  backgroundColor: currentStep >= 1 ? '#2ecc71' : '#6c757d',
+                  transition: 'background-color 0.3s ease'
+                }}
+              ></div>
+              <div 
+                className="rounded-circle" 
+                style={{ 
+                  width: '14px', 
+                  height: '14px', 
+                  backgroundColor: currentStep >= 2 ? '#2ecc71' : '#6c757d',
+                  transition: 'background-color 0.3s ease'
+                }}
+              ></div>
+              <div 
+                className="rounded-circle" 
+                style={{ 
+                  width: '14px', 
+                  height: '14px', 
+                  backgroundColor: currentStep >= 3 ? '#2ecc71' : '#6c757d',
+                  transition: 'background-color 0.3s ease'
+                }}
+              ></div>
+            </div>
+            
           </div>
         </div>
 
@@ -296,44 +338,34 @@ const Register = () => {
         </div>
 
         {/* Fixed Footer with Navigation Buttons */}
-        <div className="card-footer bg-dark border-0 text-center p-3" style={{ position: 'sticky', bottom: 0, zIndex: 1 }}>
-          <div className="d-flex gap-2 justify-content-between">
-            {currentStep > 1 && (
-              <button
-                type="button"
-                className="btn btn-outline-light px-4"
-                onClick={prevStep}
-                disabled={loading}
-              >
-                Back
-              </button>
-            )}
+        <div className="card-footer bg-dark border-0 p-3" style={{ position: 'sticky', bottom: 0, zIndex: 1 }}>
+          <div className="d-flex flex-column gap-2">
             {currentStep < 3 ? (
               <button
                 type="button"
-                className="btn btn-success px-4"
+                className="btn btn-success w-100 fw-bold"
                 onClick={nextStep}
                 disabled={loading}
                 style={{
                   background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
                   border: 'none',
                   boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
-                  marginLeft: currentStep === 1 ? 'auto' : '0'
+                  height: '43px'
                 }}
               >
-                Next
+                Next <i className="fas fa-arrow-right ms-2"></i>
               </button>
             ) : (
               <button
                 type="button"
-                className="btn btn-success px-4"
+                className="btn btn-success w-100 fw-bold mb-1"
                 onClick={handleSubmit}
                 disabled={loading}
                 style={{
                   background: 'linear-gradient(45deg, #4cd964, #2ecc71)',
                   border: 'none',
                   boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
-                  marginLeft: 'auto'
+                  height: '43px'
                 }}
               >
                 {loading ? "Registering..." : (
@@ -344,6 +376,15 @@ const Register = () => {
                 )}
               </button>
             )}
+            
+            <div className="text-center">
+              <p className="text-secondary mb-0">
+                Looking to login?{' '}
+                <Link to="/" className="text-success text-decoration-none" onClick={handleNavigateToLogin}>
+                  Sign in here
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
