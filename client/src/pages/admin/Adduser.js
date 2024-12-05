@@ -161,7 +161,7 @@ const AddUser = ({ show, onHide }) => {
               )}
 
               {/* Profile Image Upload */}
-              <div className="text-center mb-4">
+              <div className="text-center mb-0">
                 <div className="position-relative d-inline-block">
                   <img
                     src={previewUrl || "https://avatar.iran.liara.run/public/48"}
@@ -195,6 +195,9 @@ const AddUser = ({ show, onHide }) => {
                       name="profile"
                     />
                   </label>
+                </div>
+                <div>
+                    <label className="form-label text-secondary mt-3 mb-0">Select a profile picture</label>
                 </div>
               </div>
 

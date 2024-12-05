@@ -149,7 +149,7 @@ const EditProfile = ({ show, onHide, userData }) => {
               )}
 
               {/* Profile Image Upload */}
-              <div className="text-center mb-4">
+              <div className="text-center mb-2">
                 <div className="position-relative d-inline-block">
                   <img
                     src={previewUrl || `http://localhost:5000/uploads/${userData?.profile}` || "https://avatar.iran.liara.run/public/48"}
@@ -182,6 +182,9 @@ const EditProfile = ({ show, onHide, userData }) => {
                       onChange={handleFileChange}
                     />
                   </label>
+                </div>
+                <div>
+                      <label className="form-label text-secondary mt-3 mb-0">Select New profile</label>
                 </div>
               </div>
 

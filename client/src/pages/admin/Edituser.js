@@ -151,7 +151,7 @@ const EditUser = ({ show, onHide, userData }) => {
               )}
 
               {/* Profile Image Upload */}
-              <div className="text-center mb-4">
+              <div className="text-center mb-2">
                 <div className="position-relative d-inline-block">
                   <img
                     src={
@@ -188,6 +188,9 @@ const EditUser = ({ show, onHide, userData }) => {
                       onChange={handleFileChange}
                     />
                   </label>
+                </div>
+                <div>
+                      <label className="form-label text-secondary mt-3 mb-0">Select a profile picture</label>
                 </div>
               </div>
 

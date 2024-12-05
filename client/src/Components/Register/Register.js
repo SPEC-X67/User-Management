@@ -235,7 +235,7 @@ const Register = () => {
         );
       case 3:
         return (
-          <div className="text-center mb-4">
+          <div className="text-center mb-0 ">
             <div className="position-relative d-inline-block">
               <img
                 src={previewUrl || "https://avatar.iran.liara.run/public/48"}
@@ -259,6 +259,9 @@ const Register = () => {
               onChange={handleFileChange}
               accept="image/*"
             />
+            <div >
+            <label className="form-label text-secondary mt-3 mb-0">Select a profile picture</label>
+            </div>
           </div>
         );
       default:
@@ -319,7 +322,7 @@ const Register = () => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="card-body p-4" style={{ 
+        <div className="card-body px-4 pb-3" style={{ 
           overflowY: 'auto', 
           height: 'calc(100% - 160px)', 
           msOverflowStyle: 'none',
