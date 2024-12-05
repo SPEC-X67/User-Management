@@ -11,9 +11,8 @@ class userController {
         return res.status(400).json({ message: "Email already exists" });
       }
 
-      const genSalt = await bcryptjs.genSalt(10);
-      const hashedPassword = await bcryptjs.hash(password, genSalt);
-
+      const salt = await bcryptjs.genSalt(10);
+      const hashedPassword = await bcryptjs.hash(password, salt);
       const profileImage = req.file ? req.file.filename : null;
 
       const newUser = new userModel({
@@ -23,54 +22,53 @@ class userController {
         gender,
         city,
         profile: profileImage,
-        role: "user",
+        role: "user"
       });
 
-      const savedUser = await newUser.save();
-      return res.status(201).json({
-        message: "User registered successfully",
-        user: savedUser,
-      });
+      await newUser.save();
+      return res.status(201).json({ message: "User registered successfully" });
+
     } catch (error) {
       console.error("Server error:", error);
-      return res.status(500).json({
-        message: "Error creating user",
-        error: error.message,
-      });
+      return res.status(500).json({ message: "Error registering user" });
     }
   };
 
   static userLogin = async (req, res) => {
     const { email, password } = req.body;
-
     try {
-      if (email && password) {
-        const isUser = await userModel.findOne({ email });
-        if (isUser) {
-          if (
-            email === isUser.email &&
-            (await bcryptjs.compare(password, isUser.password))
-          ) {
-            // Generate token
-            const token = jwt.sign({ userID: isUser._id }, "deBySpeczin", {
-              expiresIn: "2d",
-            });
-            return res.status(200).json({
-              message: "Login Successfully",
-              token,
-              name: isUser.name,
-            });
-          } else {
-            return res.status(400).json({ message: "Invalid Credentials!" });
-          }
-        } else {
-          return res.status(400).json({ message: "user Not Registered!!" });
-        }
-      } else {
-        return res.status(400).json({ message: "*all fields are required" });
+      const user = await userModel.findOne({ email });
+      if (!user || user.role !== "user") {
+        return res.status(401).json({ message: "Invalid email or password" });
       }
+
+      const isMatch = await bcryptjs.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const token = jwt.sign(
+        { userID: user._id },
+        "deBySpeczin",
+        { expiresIn: "1d" }
+      );
+
+      return res.status(200).json({
+        message: "Login successful",
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          profile: user.profile,
+          gender: user.gender,
+          city: user.city
+        }
+      });
+
     } catch (error) {
-      return res.status(400).json({ message: error.message });
+      console.error("Login error:", error);
+      return res.status(500).json({ message: "Server error during login" });
     }
   };
 

@@ -81,7 +81,7 @@ const Dashboard = () => {
   };
 
   const getProfileImageUrl = (profileImage) => {
-    if (!profileImage) return 'https://via.placeholder.com/40';
+    if (!profileImage) return "https://avatar.iran.liara.run/public/48";
     return `http://localhost:5000/uploads/${profileImage}`;
   };
 

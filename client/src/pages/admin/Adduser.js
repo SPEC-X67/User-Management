@@ -97,35 +97,25 @@ const AddUser = ({ show, onHide }) => {
         }
       });
 
-      const result = await dispatch(addUser(data)).unwrap();
-      if (result && result.success) {
-        toast.success('User added successfully');
-        resetForm();
-        onHide();
-      } else {
-        throw new Error(result.message || 'Failed to add user');
-      }
+      await dispatch(addUser(data)).unwrap();
+      toast.success('User added successfully');
+      resetForm();
+      onHide();
     } catch (error) {
       const errorMessage = error?.message || error || 'Failed to add user';
-      if (errorMessage.toLowerCase().includes('email already exists')) {
-        setClientError('*email already exists');
-      } else {
-        setClientError('*' + errorMessage.toLowerCase());
-      }
+      setClientError('*' + errorMessage.toLowerCase());
       toast.error(errorMessage);
     }
   };
 
   const handleModalClick = (e) => {
-    if (e.target.className.includes("modal fade") && !clientError && !serverError) {
+    if (e.target.className.includes("modal fade")) {
       onHide();
     }
   };
 
   const handleCloseClick = () => {
-    if (!clientError && !serverError) {
-      onHide();
-    }
+    onHide();
   };
 
   return (

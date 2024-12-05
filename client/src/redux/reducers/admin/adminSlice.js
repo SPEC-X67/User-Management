@@ -28,12 +28,9 @@ export const loginAdmin = createAsyncThunk('admin/loginAdmin',
         try {
             const response = await api.post('/admin/login', userData);
             const { adminToken, name } = response.data;
-            if (adminToken) {
-                localStorage.setItem('adminToken', adminToken);
-                localStorage.setItem('adminName', name);
-                return response.data;
-            }
-            return rejectWithValue('Login failed: No token received');
+            localStorage.setItem('adminToken', adminToken);
+            localStorage.setItem('adminName', name);
+            return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Login failed');
         }
@@ -61,14 +58,9 @@ export const addUser = createAsyncThunk(
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            if (response.data.success) {
-                return response.data;
-            } else {
-                return rejectWithValue(response.data.message);
-            }
+            return response.data;
         } catch (error) {
-            const errorMessage = error.response?.data?.message || error.message || 'Failed to add user';
-            return rejectWithValue(errorMessage);
+            return rejectWithValue(error.response?.data?.message || 'Failed to add user');
         }
     }
 );
@@ -84,11 +76,7 @@ export const updateUser = createAsyncThunk(
             });
             return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.message || 
-                error.message || 
-                'Failed to update user'
-            );
+            return rejectWithValue(error.response?.data?.message || 'Failed to update user');
         }
     }
 );

@@ -15,16 +15,13 @@ class userController {
     static createNewUser = async(req, res) => {
         const { name, email, password, gender, city } = req.body;
         try {
-
             const isEmail = await userModel.findOne({ email });
             if (isEmail) {
                 return res.status(400).json({ message: "Email already exists" });
             }
 
-            // Hash password
             const salt = await bcryptjs.genSalt(10);
             const hashedPassword = await bcryptjs.hash(password, salt);
-
             const profileImage = req.file ? req.file.filename : null;
             
             const newUser = new userModel({
@@ -55,14 +52,9 @@ class userController {
     static adminLogin = async(req, res) => {
         const { email, password } = req.body;
         try {
-
             const user = await userModel.findOne({ email });
-            if (!user) {
+            if (!user || user.role !== "admin") {
                 return res.status(401).json({ message: "Invalid email or password" });
-            }
-
-            if (user.role !== "admin") {
-                return res.status(403).json({ message: "Access denied. Admin only." });
             }
 
             const isMatch = await bcryptjs.compare(password, user.password);
@@ -70,7 +62,6 @@ class userController {
                 return res.status(401).json({ message: "Invalid email or password" });
             }
 
-            // Generate admin token
             const adminToken = jwt.sign(
                 { userID: user._id, role: user.role },
                 "deBySpeczin",
