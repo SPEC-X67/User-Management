@@ -1,25 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Create axios instance with auth header
-const getAuthHeader = () => {
-    const token = localStorage.getItem('adminToken');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
 const api = axios.create({
     baseURL: 'http://localhost:5000/api'
 });
 
-// Add request interceptor to always use latest token
 api.interceptors.request.use((config) => {
-    // Don't add auth header for login request
     if (config.url === '/admin/login') return config;
-    
-    config.headers = {
-        ...config.headers,
-        ...getAuthHeader()
-    };
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
 });
 
@@ -54,9 +45,7 @@ export const addUser = createAsyncThunk(
     async (userData, { rejectWithValue }) => {
         try {
             const response = await api.post('/admin/users', userData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             return response.data;
         } catch (error) {
@@ -70,9 +59,7 @@ export const updateUser = createAsyncThunk(
     async ({id, data}, { rejectWithValue }) => {
         try {
             const response = await api.put(`/admin/users/edituser/${id}`, data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             return response.data;
         } catch (error) {
@@ -86,17 +73,9 @@ export const deleteUser = createAsyncThunk(
     async (userId, { rejectWithValue }) => {
         try {
             const response = await api.delete(`/admin/users/deleteuser/${userId}`);
-            if (response.data) {
-                return response.data;
-            } else {
-                return rejectWithValue('Failed to delete user');
-            }
+            return response.data;
         } catch (error) {
-            return rejectWithValue(
-                error.response?.data?.message || 
-                error.message || 
-                'Failed to delete user'
-            );
+            return rejectWithValue(error.response?.data?.message || 'Failed to delete user');
         }
     }
 );
@@ -124,6 +103,7 @@ const adminSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
+        // Login cases
         builder
             .addCase(loginAdmin.pending, (state) => {
                 state.loading = true;
@@ -133,7 +113,6 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.currentAdmin = action.payload.name;
                 state.isAuthenticated = true;
-                state.error = null;
             })
             .addCase(loginAdmin.rejected, (state, action) => {
                 state.loading = false;
@@ -141,6 +120,8 @@ const adminSlice = createSlice({
                 state.isAuthenticated = false;
                 state.currentAdmin = null;
             })
+
+            // Get all users cases
             .addCase(getAllUsers.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -153,46 +134,52 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
+
+            // Add user cases
             .addCase(addUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(addUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.error = null;
                 if (action.payload.user) {
-                    state.users = [...state.users, action.payload.user];
+                    state.users.push(action.payload.user);
                 }
             })
             .addCase(addUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
+
+            // Update user cases
             .addCase(updateUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(updateUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.error = null;
                 if (action.payload.user) {
-                    state.users = state.users.map(user => 
-                        user._id === action.payload.user._id ? action.payload.user : user
-                    );
+                    const index = state.users.findIndex(user => user._id === action.payload.user._id);
+                    if (index !== -1) {
+                        state.users[index] = action.payload.user;
+                    }
                 }
             })
             .addCase(updateUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
-            .addCase(deleteUser.pending, (state) => { 
+
+            // Delete user cases
+            .addCase(deleteUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(deleteUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.users = state.users.filter(user => user._id !== action.payload.deletedUser._id);
-                state.error = null;
+                if (action.payload.deletedUser) {
+                    state.users = state.users.filter(user => user._id !== action.payload.deletedUser._id);
+                }
             })
             .addCase(deleteUser.rejected, (state, action) => {
                 state.loading = false;

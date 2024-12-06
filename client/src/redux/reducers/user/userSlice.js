@@ -14,17 +14,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Login user thunk
 export const loginUser = createAsyncThunk('user/loginUser', async (userData, { rejectWithValue }) => {
   try {
     const response = await api.post('/users/login', userData);
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('userName', response.data.name);
+    const { token, name } = response.data;
+    localStorage.setItem('token', token);
+    localStorage.setItem('userName', name);
     return response.data;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || 'Login failed');
   }
 });
 
+// Register user thunk
 export const registerUser = createAsyncThunk('user/registerUser', async (userData, { rejectWithValue }) => {
   try {
     const response = await api.post('/users/register', userData);
@@ -34,41 +37,41 @@ export const registerUser = createAsyncThunk('user/registerUser', async (userDat
   }
 });
 
+// Update user profile thunk
 export const updateUserProfile = createAsyncThunk('user/updateUserProfile', async ({ id, data }, { rejectWithValue }) => {
   try {
     const response = await api.put(`/users/profile/${id}`, data);
     return response.data;
   } catch (error) {
-    if (error.response && error.response.data) {
-      return rejectWithValue(error.response.data);
-    }
-    return rejectWithValue({ message: 'Failed to update user' });
+    return rejectWithValue(error.response?.data?.message || 'Failed to update profile');
   }
 });
 
+// User slice
 const userSlice = createSlice({
   name: 'user',
   initialState: {
     currentUser: null,
-    users: [],
     loading: false,
     error: null,
     isAuthenticated: !!localStorage.getItem('token')
   },
   reducers: {
+    // Logout reducer
     logout: (state) => {
       state.currentUser = null;
-      state.users = [];
-      state.error = null;
       state.isAuthenticated = false;
+      state.error = null;
       localStorage.removeItem('token');
       localStorage.removeItem('userName');
     },
+    // Clear error reducer
     clearError: (state) => {
       state.error = null;
     }
   },
   extraReducers: (builder) => {
+    // Login cases
     builder
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
@@ -78,40 +81,42 @@ const userSlice = createSlice({
         state.loading = false;
         state.currentUser = action.payload;
         state.isAuthenticated = true;
-        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.isAuthenticated = false;
       })
+
+      // Register cases
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
-        state.users.push(action.payload);
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
+      // Update profile cases
       .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = null;
         state.currentUser = action.payload;
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || action.error.message;
+        state.error = action.payload;
       });
   }
 });
 
+// Export actions and reducer
 export const { logout, clearError } = userSlice.actions;
 export default userSlice.reducer;

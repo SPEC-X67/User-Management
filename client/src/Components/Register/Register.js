@@ -86,6 +86,12 @@ const Register = () => {
           setClientError('*email, city and gender are required');
           return false;
         }
+
+        if (!/^[A-Za-z\s]+$/.test(formData.city.trim())) {
+          setClientError('*Enter a valid city name');
+          return false;
+        }
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
           setClientError('*please enter a valid email address');
