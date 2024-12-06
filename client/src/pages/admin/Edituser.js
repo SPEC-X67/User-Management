@@ -12,6 +12,7 @@ const EditUser = ({ show, onHide, userData }) => {
     gender: "",
     city: "",
     profile: null,
+    role: "" // Adding role field
   });
 
   const [error, setError] = useState("");
@@ -29,6 +30,7 @@ const EditUser = ({ show, onHide, userData }) => {
         gender: userData.gender || "",
         city: userData.city || "",
         profile: null,
+        role: userData.role || "user" // Setting role from userData
       });
       setPreviewUrl(
         userData.profile
@@ -92,6 +94,7 @@ const EditUser = ({ show, onHide, userData }) => {
     formDataToSend.append("email", formData.email);
     formDataToSend.append("city", formData.city);
     formDataToSend.append("gender", formData.gender);
+    formDataToSend.append("role", formData.role); // Adding role to form data
     if (formData.password) formDataToSend.append("password", formData.password);
     if (formData.profile) formDataToSend.append("profile", formData.profile);
 
@@ -190,7 +193,7 @@ const EditUser = ({ show, onHide, userData }) => {
                   </label>
                 </div>
                 <div>
-                      <label className="form-label text-secondary mt-3 mb-0">Select a profile picture</label>
+                  <label className="form-label text-secondary mt-3 mb-0">Select a profile picture</label>
                 </div>
               </div>
 
@@ -256,18 +259,16 @@ const EditUser = ({ show, onHide, userData }) => {
                   </div>
                 </div>
 
-                {/* Gender Field */}
-                <div className="form-group">
-                  <label className="form-label text-secondary small">
-                    Gender
-                  </label>
+                {/* Gender Selection */}
+                <div className="mb-3">
+                  <label className="form-label text-secondary small">Gender</label>
                   <div className="input-group">
                     <span className="input-group-text bg-dark border-secondary">
                       <i className="fas fa-venus-mars text-secondary"></i>
                     </span>
                     <select
-                      className="form-select bg-dark text-white border-secondary rounded-0 rounded-end"
                       name="gender"
+                      className="form-select bg-dark text-white border-secondary rounded-0 rounded-end"
                       value={formData.gender}
                       onChange={handleInputChange}
                     >
@@ -276,6 +277,41 @@ const EditUser = ({ show, onHide, userData }) => {
                       <option value="female">Female</option>
                       <option value="other">Other</option>
                     </select>
+                  </div>
+                </div>
+
+                {/* Role Selection */}
+                <div className="mb-3">
+                  <label className="form-label text-secondary small">Role</label>
+                  <div className="d-flex gap-4">
+                    <div className="form-check">
+                      <input
+                        type="radio"
+                        name="role"
+                        id="roleUser"
+                        value="user"
+                        className="form-check-input"
+                        checked={formData.role === "user"}
+                        onChange={handleInputChange}
+                      />
+                      <label className="form-check-label text-white" htmlFor="roleUser">
+                        User
+                      </label>
+                    </div>
+                    <div className="form-check">
+                      <input
+                        type="radio"
+                        name="role"
+                        id="roleAdmin"
+                        value="admin"
+                        className="form-check-input"
+                        checked={formData.role === "admin"}
+                        onChange={handleInputChange}
+                      />
+                      <label className="form-check-label text-white" htmlFor="roleAdmin">
+                        Admin
+                      </label>
+                    </div>
                   </div>
                 </div>
 

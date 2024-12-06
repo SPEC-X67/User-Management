@@ -16,6 +16,7 @@ const AddUser = ({ show, onHide }) => {
     gender: "",
     city: "",
     profile: null,
+    role: "user"
   });
 
   useEffect(() => {
@@ -51,6 +52,7 @@ const AddUser = ({ show, onHide }) => {
       gender: "",
       city: "",
       profile: null,
+      role: "user"
     });
     setPreviewUrl(null);
     setClientError(null);
@@ -233,7 +235,63 @@ const AddUser = ({ show, onHide }) => {
                   </div>
                 </div>
 
-                {/* City Field */}
+                {/* Role Selection */}
+                <div className="mb-3">
+                  <label className="form-label text-secondary small">Role</label>
+                  <div className="d-flex gap-4">
+                    <div className="form-check">
+                      <input
+                        type="radio"
+                        name="role"
+                        id="roleUser"
+                        value="user"
+                        className="form-check-input"
+                        checked={formData.role === "user"}
+                        onChange={handleChange}
+                      />
+                      <label className="form-check-label text-white" htmlFor="roleUser">
+                        User
+                      </label>
+                    </div>
+                    <div className="form-check">
+                      <input
+                        type="radio"
+                        name="role"
+                        id="roleAdmin"
+                        value="admin"
+                        className="form-check-input"
+                        checked={formData.role === "admin"}
+                        onChange={handleChange}
+                      />
+                      <label className="form-check-label text-white" htmlFor="roleAdmin">
+                        Admin
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gender Selection */}
+                <div className="mb-3">
+                  <label className="form-label text-secondary small">Gender</label>
+                  <div className="input-group">
+                    <span className="input-group-text bg-dark border-secondary">
+                      <i className="fas fa-venus-mars text-secondary"></i>
+                    </span>
+                    <select
+                      name="gender"
+                      className="form-select bg-dark text-white border-secondary rounded-0 rounded-end"
+                      value={formData.gender}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* City Input */}
                 <div className="form-group">
                   <label className="form-label text-secondary small">
                     City
@@ -250,29 +308,6 @@ const AddUser = ({ show, onHide }) => {
                       value={formData.city}
                       onChange={handleChange}
                     />
-                  </div>
-                </div>
-
-                {/* Gender Field */}
-                <div className="form-group">
-                  <label className="form-label text-secondary small">
-                    Gender
-                  </label>
-                  <div className="input-group">
-                    <span className="input-group-text bg-dark border-secondary">
-                      <i className="fas fa-venus-mars text-secondary"></i>
-                    </span>
-                    <select
-                      className="form-select bg-dark text-white border-secondary rounded-0 rounded-end"
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
                   </div>
                 </div>
 

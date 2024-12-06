@@ -13,7 +13,7 @@ class userController {
     }
     
     static createNewUser = async(req, res) => {
-        const { name, email, password, gender, city } = req.body;
+        const { name, email, password, gender, city, role } = req.body;
         try {
             const isEmail = await userModel.findOne({ email });
             if (isEmail) {
@@ -31,7 +31,7 @@ class userController {
                 gender,
                 city,
                 profile: profileImage,
-                role: "user"
+                role: role || "user" // Use the role from request or default to "user"
             });
 
             const savedUser = await newUser.save();
@@ -99,26 +99,25 @@ class userController {
                 name: req.body.name,
                 email: req.body.email,
                 gender: req.body.gender,
-                city: req.body.city
+                city: req.body.city,
+                role: req.body.role // Add role to userData
+            };
+
+            // Only update password if it's provided
+            if (req.body.password) {
+                const salt = await bcryptjs.genSalt(10);
+                userData.password = await bcryptjs.hash(req.body.password, salt);
             }
-    
-            // Handle profile image
+
+            // Update profile image if provided
             if (req.file) {
                 userData.profile = req.file.filename;
             }
 
-            // Handle password
-            if (req.body.password) {
-                const salt = await bcryptjs.genSalt(10);
-                const hashedPassword = await bcryptjs.hash(req.body.password, salt);
-                userData.password = hashedPassword;
-            }
-
-            // Update user and get updated document
             const updatedUser = await userModel.findByIdAndUpdate(
-                id, 
-                userData,
-                { new: true, runValidators: true } // Return updated document and run validators
+                id,
+                { $set: userData },
+                { new: true }
             );
 
             if (!updatedUser) {
@@ -126,17 +125,13 @@ class userController {
             }
 
             return res.status(200).json({
-                success: true,
                 message: "User updated successfully",
                 user: updatedUser
             });
 
         } catch (error) {
-            console.error("Error updating user:", error);
-            if (error.code === 11000) {
-                return res.status(400).json({ message: "Email already exists" });
-            }
-            return res.status(500).json({ message: error.message || "Error updating user" });
+            console.error("Update error:", error);
+            return res.status(500).json({ message: "Error updating user" });
         }
     }
 
